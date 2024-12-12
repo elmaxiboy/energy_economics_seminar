@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NPV Calculation</title>
+</head>
+<body>
+    <h1>NPV Calculator for PV-Hydrogen Project</h1>
+    
+    <form method="POST" action="/">
+        <h3>Project Parameters:</h3>
+        <label>Project Lifetime (years):</label>
+        <input type="number" name="project_lifetime" value="{{ inputs['project_lifetime'] }}" required><br>
+
+        <label>Discount Rate (%):</label>
+        <input type="number" step="0.1" name="discount_rate" value="{{ inputs['discount_rate'] }}" required><br>
+
+        <label>Capital Expenditure (USD):</label>
+        <input type="number" step="0.1" name="capex" value="{{ inputs['capex'] }}" required><br>
+
+        <label>Operational Expenditure (USD/year):</label>
+        <input type="number" step="0.1" name="opex" value="{{ inputs['opex'] }}" required><br>
+
+        <label>Annual Energy Output (kWh):</label>
+        <input type="number" step="0.1" name="energy_output" value="{{ inputs['energy_output'] }}" required><br>
+
+        <label>Electrolyzer Efficiency (kWh/kg H2):</label>
+        <input type="number" step="0.1" name="h2_efficiency" value="{{ inputs['h2_efficiency'] }}" required><br>
+
+        <label>Hydrogen Price (USD/kg):</label>
+        <input type="number" step="0.1" name="h2_price" value="{{ inputs['h2_price'] }}" required><br>
+
+        <button type="submit">Calculate</button>
+    </form>
+
+    {% if npv %}
+        <h2>Results:</h2>
+        <p><strong>NPV:</strong> ${{ npv }}</p>
+        <p><strong>Total Hydrogen Production:</strong> {{ total_h2_production }} kg/year</p>
+        <p><strong>Annual Revenue:</strong> ${{ annual_revenue }}</p>
+        <h3>NPV Over Time:</h3>
+        <img src="/npv-graph" alt="NPV Graph">
+    {% endif %}
+</body>
+</html>
+
