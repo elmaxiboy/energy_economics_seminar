@@ -3,45 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NPV Calculation</title>
+    <title>NPV Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        label, input, button {
+            font-size: 14px;
+        }
+
+        label {
+            margin-right: 5px;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            grid-column: span 2;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        img {
+            display: block;
+            margin: 20px auto;
+            max-width: 100%;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .results > div {
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+
+        .results h3 {
+            margin-top: 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>NPV Calculator for PV-Hydrogen Project</h1>
-    
-    <form method="POST" action="/">
-        <h3>Project Parameters:</h3>
-        <label>Project Lifetime (years):</label>
-        <input type="number" name="project_lifetime" value="{{ inputs['project_lifetime'] }}" required><br>
+    <h1>NPV Calculator</h1>
+    <form method="post">
+        <!-- Input fields -->
+        <label for="project_lifetime">Project Lifetime (years):</label>
+        <input type="number" id="project_lifetime" name="project_lifetime" value="{{ inputs.project_lifetime }}" placeholder="Project Lifetime (years)" required>
 
-        <label>Discount Rate (%):</label>
-        <input type="number" step="0.1" name="discount_rate" value="{{ inputs['discount_rate'] }}" required><br>
+        <label for="discount_rate">Discount Rate (%):</label>
+        <input type="number" step="0.01" id="discount_rate" name="discount_rate" value="{{ inputs.discount_rate }}" placeholder="Discount Rate (%)" required>
 
-        <label>Capital Expenditure (USD):</label>
-        <input type="number" step="0.1" name="capex" value="{{ inputs['capex'] }}" required><br>
+        <label for="capex">CAPEX (USD):</label>
+        <input type="number" step="0.01" id="capex" name="capex" value="{{ inputs.capex }}" placeholder="CAPEX (USD)" required>
 
-        <label>Operational Expenditure (USD/year):</label>
-        <input type="number" step="0.1" name="opex" value="{{ inputs['opex'] }}" required><br>
+        <label for="opex">OPEX (USD):</label>
+        <input type="number" step="0.01" id="opex" name="opex" value="{{ inputs.opex }}" placeholder="OPEX (USD)" required>
 
-        <label>Annual Energy Output (kWh):</label>
-        <input type="number" step="0.1" name="energy_output" value="{{ inputs['energy_output'] }}" required><br>
+        <label for="energy_output">Energy Output (kWh):</label>
+        <input type="number" step="0.01" id="energy_output" name="energy_output" value="{{ inputs.energy_output }}" placeholder="Energy Output (kWh)" required>
 
-        <label>Electrolyzer Efficiency (kWh/kg H2):</label>
-        <input type="number" step="0.1" name="h2_efficiency" value="{{ inputs['h2_efficiency'] }}" required><br>
+        <label for="h2_efficiency">H2 Efficiency (%):</label>
+        <input type="number" step="0.01" id="h2_efficiency" name="h2_efficiency" value="{{ inputs.h2_efficiency }}" placeholder="H2 Efficiency (%)" required>
 
-        <label>Hydrogen Price (USD/kg):</label>
-        <input type="number" step="0.1" name="h2_price" value="{{ inputs['h2_price'] }}" required><br>
+        <label for="h2_price">H2 Price (USD/kg):</label>
+        <input type="number" step="0.01" id="h2_price" name="h2_price" value="{{ inputs.h2_price }}" placeholder="H2 Price (USD/kg)" required>
 
         <button type="submit">Calculate</button>
     </form>
 
-    {% if npv %}
-        <h2>Results:</h2>
-        <p><strong>NPV:</strong> ${{ npv }}</p>
-        <p><strong>Total Hydrogen Production:</strong> {{ total_h2_production }} kg/year</p>
-        <p><strong>Annual Revenue:</strong> ${{ annual_revenue }}</p>
-        <h3>NPV Over Time:</h3>
-        <img src="/npv-graph" alt="NPV Graph">
+    {% if npv is not none %}
+    <div class="results">
+        <div>
+            <h3>Summary</h3>
+            <p><strong>NPV:</strong> {{ npv | format_number }}</p>
+            <p><strong>Total H2 Production:</strong> {{ total_h2_production | format_number }} kg/year</p>
+            <p><strong>Annual Revenue:</strong> {{ annual_revenue | format_number }} USD</p>
+        </div>
+        <div>
+            <h3>NPV Graph</h3>
+            <img src="/npv-graph?project_lifetime={{ inputs.project_lifetime }}&discount_rate={{ inputs.discount_rate }}&capex={{ inputs.capex }}&opex={{ inputs.opex }}&energy_output={{ inputs.energy_output }}&h2_efficiency={{ inputs.h2_efficiency }}&h2_price={{ inputs.h2_price }}" alt="NPV Graph">
+        </div>
+    </div>
+
+    <h3>Cash Flows</h3>
+    <table>
+        <tr>
+            <th>Year</th>
+            <th>Cash Flow</th>
+            <th>Discounted Cash Flow</th>
+        </tr>
+        {% for year, cash_flow, discounted_cf in cash_flow_table %}
+        <tr>
+            <td>{{ year }}</td>
+            <td>{{ cash_flow | round(2) | format_number }}</td>
+            <td>{{ discounted_cf | round(2) | format_number }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td><strong>Total</strong></td>
+            <td><strong>{{ total_cash_flow | format_number }}</strong></td>
+            <td><strong>{{ total_discounted_cash_flow | format_number }}</strong></td>
+        </tr>
+    </table>
     {% endif %}
 </body>
 </html>
-
