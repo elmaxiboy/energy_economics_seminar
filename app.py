@@ -11,6 +11,8 @@ import io
 app = Flask(__name__)
 app.secret_key = "seminar"  # Required for Flask-WTF forms
 
+
+#TODO:include capacity factor of Solar plant, CO2 prices, radiation
 # NPV Calculation Function
 def calculate_npv(project_lifetime, discount_rate, capex, opex, energy_output, h2_efficiency, h2_price):
     results = []
@@ -39,7 +41,7 @@ def generate_npv_graph(project_lifetime, discounted_cash_flows_with_capex):
     # Cumulative cash flows (including initial CapEx)
     cumulative_npv = np.cumsum(discounted_cash_flows_with_capex)
     years = range(0, project_lifetime + 1)  # Include year 0 for CapEx
-    
+
     def millions_formatter(x, pos):
         return f"${x / 1_000_000:.1f}MM"
 
