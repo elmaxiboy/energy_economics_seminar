@@ -46,13 +46,14 @@
         <div>
             <h3>Summary</h3>
             <p><strong>Energy Output:</strong> {{ energy_output | format_number }} MWh/year</p>
-            <p><strong>NPV:</strong> {{ npv | format_number }}</p>
+            <p><strong>NPV:</strong> {{ npv | format_number }} USD</p>
             <p><strong>Total H2 Production:</strong> {{ total_h2_production | format_number }} kg/year</p>
             <p><strong>Annual Revenue:</strong> {{ annual_revenue | format_number }} USD</p>
         </div>
         <div>
+             <!-- TODO: split endpoint call for better readability -->
             <h3>NPV Graph</h3>
-            <img src="/npv-graph?project_lifetime={{ inputs.project_lifetime }}&discount_rate={{ inputs.discount_rate }}&capex={{ inputs.capex }}&opex={{ inputs.opex }}&h2_efficiency={{ inputs.h2_efficiency }}&h2_price={{ inputs.h2_price }}&cap_factor={{ inputs.cap_factor }}&&installed_cap={{ inputs.installed_cap}}" alt="NPV Graph">
+            <img src="/npv-graph?project_lifetime={{ inputs.project_lifetime }}&discount_rate={{ inputs.discount_rate }}&capex={{ inputs.capex }}&opex={{ inputs.opex }}&h2_efficiency={{ inputs.h2_efficiency }}&h2_price={{ inputs.h2_price }}&cap_factor={{ inputs.cap_factor }}&installed_cap={{ inputs.installed_cap}}" alt="NPV Graph">
         </div>
     </div>
 
