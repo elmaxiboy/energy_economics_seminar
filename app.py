@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, url_for
 import utils
 
 app = Flask(__name__)
@@ -11,16 +11,6 @@ app.secret_key = "seminar"  # Required for Flask-WTF forms
 # NPV Calculation Function
 @app.route("/", methods=["GET", "POST"])
 def index():
-    default_values = {
-        "project_lifetime": 20,
-        "discount_rate": 8,
-        "capex": 15000000,
-        "opex": 300000,
-        "h2_efficiency": 55,
-        "h2_price": 5.5,
-        "cap_factor":14.7,
-        "installed_cap":15
-    }
     
     if request.method == "POST":
 
@@ -72,12 +62,13 @@ def index():
         )
     #rest of allowed methods
 
-    return render_template("index.html", inputs=default_values)
+    return render_template("index.html", inputs=utils.default_values)
     
 #TODO: Avoid calling twice npv_calculation for plotting
 
 @app.route("/npv-graph", methods=["GET", "POST"])
 def npv_graph():
+    
     project_lifetime = int(request.args.get("project_lifetime", 20))
     discount_rate = float(request.args.get("discount_rate", 8))
     capex = float(request.args.get("capex", 15000000))
