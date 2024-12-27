@@ -2,11 +2,14 @@
 
 from flask import Flask, render_template, request, send_file, url_for
 import utils
+from plant import solar,hydrogen
 
 app = Flask(__name__)
 app.secret_key = "seminar"  # Required for Flask-WTF forms
 
-#TODO: CO2 prices, radiation,intrayear, cap. factor, capture seasonality
+#TODO: CO2 prices, radiation,intrayear, capture seasonality
+
+
 
 # NPV Calculation Function
 @app.route("/", methods=["GET", "POST"])
@@ -23,6 +26,16 @@ def index():
         h2_price = float(request.form["h2_price"])
         cap_factor = float(request.form["cap_factor"])
         installed_cap = float(request.form["installed_cap"])
+
+        global solar_plant
+        solar_plant = solar.solar(installed_cap,cap_factor)
+        h2_plant=hydrogen.hydrogen(h2_efficiency,h2_price)
+
+        print(solar_plant)
+        print(h2_plant)
+
+        solar_plant.calculate_avg_monthly_ghi()
+
         
         (energy_output,
         npv,
@@ -41,7 +54,6 @@ def index():
             installed_cap)
         
         # Pass the zipped data to the template
-
         cash_flow_table = list(zip(range(0, project_lifetime + 1), cash_flows, discounted_cash_flows,cum_npv))
 
         total_cash_flow = sum(cash_flows) or 0
@@ -61,14 +73,19 @@ def index():
             inputs=request.form
         )
     #rest of allowed methods
-
     return render_template("index.html", inputs=utils.default_values)
     
 #TODO: Avoid calling twice npv_calculation for plotting
 
+@app.route("/avg-monthly-ghi-graph", methods=["GET", "POST"])
+def avg_monthly_ghi_graph():
+    
+    return solar_plant.avg_monthly_ghi
+
+
+
 @app.route("/npv-graph", methods=["GET", "POST"])
 def npv_graph():
-    
     project_lifetime = int(request.args.get("project_lifetime", 20))
     discount_rate = float(request.args.get("discount_rate", 8))
     capex = float(request.args.get("capex", 15000000))

@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <title>Advanced Seminar</title>
 </head>
 <body>
@@ -64,6 +65,12 @@
                 'installed_cap': inputs.installed_cap
             }) }}"
             alt="NPV Graph">
+        </div>
+        <div>
+            <h2>Average Monthly GHI</h2>
+            <svg width="800" height="400"></svg>
+            <script src="{{ url_for('static', filename='charts.js') }}"></script>
+
         </div>
     </div>
 

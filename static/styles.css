@@ -73,3 +73,26 @@ img {
 .results h3 {
     margin-top: 0;
 }
+
+
+.bar {
+    fill: orange;
+}
+
+.bar:hover {
+    fill: darkorange;
+}
+
+.axis path, .axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.x-axis text {
+    font-size: 12px;
+}
+
+.y-axis text {
+    font-size: 12px;
+}
