@@ -96,3 +96,12 @@ img {
 .y-axis text {
     font-size: 12px;
 }
+.tooltip {
+    position: absolute;
+    background-color: white;
+    border: 1px solid black;
+    padding: 5px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+}

@@ -71,4 +71,25 @@
         .attr("transform", "rotate(-90)")
         .attr("text-anchor", "middle")
         .text("Radiation (kWh/m²/day)");
+
+
+    // Tooltip
+    const tooltip = d3.select(".tooltip");
+
+    svg.selectAll(".bar")
+    .on("mouseover", function (event, d) {
+        // Access the correct radiation value using data[d.toString()]
+        tooltip.style("opacity", 1)
+            .html(`Month: ${d.month}<br>Radiation: ${d.radiation} kWh/m²`)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 20) + "px");
+    })
+    .on("mousemove", function (event) {
+        tooltip.style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 20) + "px");
+    })
+    .on("mouseout", function () {
+        tooltip.style("opacity", 0);
+    });
+ 
 });

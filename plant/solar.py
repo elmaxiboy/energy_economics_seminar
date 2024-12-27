@@ -44,7 +44,7 @@ class solar:
         df['year'] = df['yearMonth'].str[:4]
         df = df.drop(df[df['month'] == '13'].index)
         df=df.drop('yearMonth',axis=1)
-        df= df.groupby('month')['radiation'].mean()
+        df= df.groupby('month')['radiation'].mean().round(2)
 
         # Group by the month and calculate the mean
         self.avg_monthly_ghi = df.to_json()

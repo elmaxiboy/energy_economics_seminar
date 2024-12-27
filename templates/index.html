@@ -25,10 +25,10 @@
         <input type="number" step="0.1" id="opex" name="opex" value="{{ inputs.opex }}" placeholder="OPEX (USD)" required>
 
         <label for="latitude">Latitude:</label>
-        <input type="number" step="0.0001" id="latitude" name="latitude" value="{{ inputs.latitude }}" placeholder="Latitude" required>
+        <input type="number" step="0.000001" id="latitude" name="latitude" value="{{ inputs.latitude }}" placeholder="Latitude" required>
 
         <label for="longitude">Longitude:</label>
-        <input type="number" step="0.0001" id="longitude" name="longitude" value="{{ inputs.longitude }}" placeholder="Longitude" required>
+        <input type="number" step="0.000001" id="longitude" name="longitude" value="{{ inputs.longitude }}" placeholder="Longitude" required>
 
         <label for="cap_factor">Solar Plant Capacity Factor (%):</label>
         <input type="number" step="0.1" id="cap_factor" name="cap_factor" value="{{ inputs.cap_factor }}" placeholder="Capacity Factor" required>
@@ -73,8 +73,9 @@
             alt="NPV Graph">
         </div>
         <div>
-            <h2>Average Monthly GHI</h2>
-            <svg width="800" height="400"></svg>
+            <h2>Average Daily Global Horizontal Irradiance</h2>
+            <svg width="600" height="300"></svg>
+            <div class="tooltip"></div>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
 
         </div>
