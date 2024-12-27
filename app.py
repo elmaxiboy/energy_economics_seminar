@@ -26,9 +26,11 @@ def index():
         h2_price = float(request.form["h2_price"])
         cap_factor = float(request.form["cap_factor"])
         installed_cap = float(request.form["installed_cap"])
+        longitude = float(request.form["longitude"])
+        latitude = float(request.form["latitude"])
 
         global solar_plant
-        solar_plant = solar.solar(installed_cap,cap_factor)
+        solar_plant = solar.solar(installed_cap,cap_factor,latitude,longitude)
         h2_plant=hydrogen.hydrogen(h2_efficiency,h2_price)
 
         print(solar_plant)

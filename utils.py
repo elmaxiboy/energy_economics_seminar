@@ -13,7 +13,9 @@ default_values = {
         "h2_efficiency": 55,
         "h2_price": 5.5,
         "cap_factor":14.7,
-        "installed_cap":15
+        "installed_cap":15,
+        "latitude":-23.8634,
+        "longitude":-69.1328
     }
 
 def calculate_hydrogen_from_energy(mwh, efficiency):

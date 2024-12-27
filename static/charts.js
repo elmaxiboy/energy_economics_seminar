@@ -70,5 +70,5 @@
         .attr("y", -margin.left + 15)
         .attr("transform", "rotate(-90)")
         .attr("text-anchor", "middle")
-        .text("Radiation (kWh/m²)");
+        .text("Radiation (kWh/m²/day)");
 });

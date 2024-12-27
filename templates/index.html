@@ -24,6 +24,12 @@
         <label for="opex">OPEX (USD):</label>
         <input type="number" step="0.1" id="opex" name="opex" value="{{ inputs.opex }}" placeholder="OPEX (USD)" required>
 
+        <label for="latitude">Latitude:</label>
+        <input type="number" step="0.0001" id="latitude" name="latitude" value="{{ inputs.latitude }}" placeholder="Latitude" required>
+
+        <label for="longitude">Longitude:</label>
+        <input type="number" step="0.0001" id="longitude" name="longitude" value="{{ inputs.longitude }}" placeholder="Longitude" required>
+
         <label for="cap_factor">Solar Plant Capacity Factor (%):</label>
         <input type="number" step="0.1" id="cap_factor" name="cap_factor" value="{{ inputs.cap_factor }}" placeholder="Capacity Factor" required>
 

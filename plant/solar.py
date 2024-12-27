@@ -3,14 +3,14 @@ import requests
 import pandas as pd
 
 class solar:
-    def __init__(self, installed_cap: float, cap_factor: float):
+    def __init__(self, installed_cap: float, cap_factor: float, latitude: float,longitude: float):
         """
         Initializes a solar plant.
         """
         self.installed_cap = installed_cap
         self.cap_factor = cap_factor
-        self.latitude= -33.459229 # Santiago de Chile
-        self.longitude= -70.645348
+        self.latitude= latitude 
+        self.longitude= longitude
         self.annual_production_mwh= None
         self.avg_monthly_ghi=None
 
@@ -48,10 +48,6 @@ class solar:
 
         # Group by the month and calculate the mean
         self.avg_monthly_ghi = df.to_json()
-
-        # Display the results
-        print("Average monthly Global Horizontal Irradiance:")
-        print(self.avg_monthly_ghi)        
 
         if response.status_code != 200:
             raise Exception("Failed to retrieve solar radiation data.")       
