@@ -30,9 +30,6 @@
         <label for="longitude">Longitude:</label>
         <input type="number" step="0.000001" id="longitude" name="longitude" value="{{ inputs.longitude }}" placeholder="Longitude" required>
 
-        <label for="cap_factor">Solar Plant Capacity Factor (%):</label>
-        <input type="number" step="0.1" id="cap_factor" name="cap_factor" value="{{ inputs.cap_factor }}" placeholder="Capacity Factor" required>
-
         <label for="prod_decline">Solar Plant Production Decline:</label>
         <input type="number" step="0.1" id="prod_decline" name="prod_decline" value="{{ inputs.prod_decline }}" placeholder="Production Decline">
         
@@ -52,10 +49,12 @@
     <div class="results">
         <div>
             <h3>Summary</h3>
-            <p><strong>Energy Output:</strong> {{ energy_output | format_number }} MWh/year</p>
-            <p><strong>NPV:</strong> {{ npv | format_number }} USD</p>
+            <p><strong>Produced Energy:</strong> {{ energy_output2 | format_number }} MWh/year</p>
+            <p><strong>Estimated Cap. Factor:</strong> {{ cap_factor | format_number }} </p>
             <p><strong>Total H2 Production:</strong> {{ total_h2_production | format_number }} kg/year</p>
             <p><strong>Annual Revenue:</strong> {{ annual_revenue | format_number }} USD</p>
+            <p><strong>NPV:</strong> {{ npv | format_number }} USD</p>
+            
         </div>
         <div>
             <h3>NPV Graph</h3>
@@ -67,7 +66,6 @@
                 'opex': inputs.opex,
                 'h2_efficiency': inputs.h2_efficiency,
                 'h2_price': inputs.h2_price,
-                'cap_factor': inputs.cap_factor,
                 'installed_cap': inputs.installed_cap
             }) }}"
             alt="NPV Graph">
@@ -77,6 +75,7 @@
             <svg width="600" height="300"></svg>
             <div class="tooltip"></div>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
+            <script>draw_ghi()</script>
 
         </div>
     </div>
