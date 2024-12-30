@@ -31,13 +31,13 @@ def calculate_hydrogen_from_energy(mwh, efficiency):
     return round(hydrogen_production, 2)
 
 
-def calculate_npv(project_lifetime, discount_rate, capex, opex, h2_efficiency, h2_price, cap_factor,installed_cap):
+def calculate_npv(project_lifetime, discount_rate, capex, opex, h2_efficiency, h2_price, energy_output):
     
     discounted_cash_flows = []
     cum_npv = []
     cash_flows = []
 
-    energy_output= installed_cap*(cap_factor/100)*8760 #MWh a year
+ 
     # Convert parameters
     discount_rate /= 100  # Convert to decimal
     total_h2_production = calculate_hydrogen_from_energy(energy_output,h2_efficiency)  # Annual H2 production in kg

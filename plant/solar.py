@@ -1,32 +1,36 @@
 
 import requests
 import pandas as pd
+import json
 
 class solar:
-    def __init__(self, installed_cap: float, cap_factor: float, latitude: float,longitude: float):
+    def __init__(self, installed_cap: float, latitude: float,longitude: float):
         """
         Initializes a solar plant.
         """
         self.installed_cap = installed_cap
-        self.cap_factor = cap_factor
+        self.cap_factor = None
         self.latitude= latitude 
         self.longitude= longitude
         self.annual_production_mwh= None
         self.avg_monthly_ghi=None
 
 
-    def calculate_annual_production(self, average_daily_radiation: float, efficiency: float):
+    def calculate_annual_production(self, efficiency: float):
         """
-        Calculates the annual energy production in MWh.
+        Calculates the annual energy production in KWh.
 
         :param average_daily_radiation: Average daily radiation in kWh/m²
         :param efficiency: Efficiency of the solar panels (0-1)
         """
-        # Assume 365 days in a year
-        self.annual_production_kwh = (
-            self.capacity_kw * average_daily_radiation * 365 * efficiency
-        )
-        return self.annual_production_kwh
+        annual_production=0
+        data_dict = json.loads(self.avg_monthly_ghi)
+        for month,ghi in data_dict.items():
+            annual_production=annual_production+(ghi*30)*efficiency  
+
+        self.annual_production_mwh = (annual_production/1000)*self.installed_cap*6000# 1MW requires 6000 m2
+
+        return self.annual_production_mwh
     
 
     def calculate_avg_monthly_ghi(self):
@@ -53,6 +57,11 @@ class solar:
             raise Exception("Failed to retrieve solar radiation data.")       
 
         return self.avg_monthly_ghi
+    
+    def calculate_capacity_factor(self):
+        theoretical_annual_production= self.installed_cap*365*24
+        self.cap_factor=self.annual_production_mwh/theoretical_annual_production
+        return self.cap_factor
 
     
     def __str__(self):

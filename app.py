@@ -24,19 +24,18 @@ def index():
         opex = float(request.form["opex"])
         h2_efficiency = float(request.form["h2_efficiency"])
         h2_price = float(request.form["h2_price"])
-        cap_factor = float(request.form["cap_factor"])
+        #cap_factor = float(request.form["cap_factor"])
         installed_cap = float(request.form["installed_cap"])
         longitude = float(request.form["longitude"])
         latitude = float(request.form["latitude"])
 
         global solar_plant
-        solar_plant = solar.solar(installed_cap,cap_factor,latitude,longitude)
+        solar_plant = solar.solar(installed_cap,latitude,longitude)
         h2_plant=hydrogen.hydrogen(h2_efficiency,h2_price)
 
-        print(solar_plant)
-        print(h2_plant)
-
         solar_plant.calculate_avg_monthly_ghi()
+        energy_output2=solar_plant.calculate_annual_production(0.15)# 20% panel efficiency
+        cap_factor=solar_plant.calculate_capacity_factor()
 
         
         (energy_output,
@@ -52,8 +51,7 @@ def index():
             opex,
             h2_efficiency,
             h2_price,
-            cap_factor,
-            installed_cap)
+            energy_output2)
         
         # Pass the zipped data to the template
         cash_flow_table = list(zip(range(0, project_lifetime + 1), cash_flows, discounted_cash_flows,cum_npv))
@@ -67,11 +65,13 @@ def index():
             npv=npv,
             total_h2_production=total_h2_production,
             energy_output=energy_output,
+            energy_output2=energy_output2,
             annual_revenue=annual_revenue,
             cash_flow_table=cash_flow_table,
             total_cash_flow=round(total_cash_flow, 2),
             total_discounted_cash_flow=round(total_discounted_cash_flow, 2),
             total_cum_npv=round(total_cum_npv, 2),
+            cap_factor=round(cap_factor,2),
             inputs=request.form
         )
     #rest of allowed methods
@@ -80,10 +80,12 @@ def index():
 #TODO: Avoid calling twice npv_calculation for plotting
 
 @app.route("/avg-monthly-ghi-graph", methods=["GET", "POST"])
-def avg_monthly_ghi_graph():
-    
+def avg_monthly_ghi_graph():  
     return solar_plant.avg_monthly_ghi
 
+@app.route("/npv-graph", methods=["GET", "POST"])
+def npv_graph():  
+    return solar_plant.avg_monthly_ghi
 
 
 @app.route("/npv-graph", methods=["GET", "POST"])
@@ -94,12 +96,11 @@ def npv_graph():
     opex = float(request.args.get("opex", 300000))
     h2_efficiency = float(request.args.get("h2_efficiency", 55))
     h2_price = float(request.args.get("h2_price", 5))
-    cap_factor = float(request.args.get("cap_factor", 5))
+    cap_factor = solar_plant.cap_factor
     installed_cap = float(request.args.get("installed_cap", 5))
     
     _,_, _, _, _, _,cum_npv = utils.calculate_npv(
-        project_lifetime, discount_rate, capex, opex, h2_efficiency, h2_price,cap_factor,installed_cap
-    )
+        project_lifetime, discount_rate, capex, opex, h2_efficiency, h2_price,solar_plant.annual_production_mwh)
 
     img = utils.generate_npv_graph(project_lifetime, cum_npv)
 
