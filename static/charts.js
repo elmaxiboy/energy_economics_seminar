@@ -1,3 +1,6 @@
+ const svg_width = 800
+ const svg_height = 400
+ 
  function draw_ghi(){
     // Load the JSON data
     d3.json('/avg-monthly-ghi-graph').then(data => {
@@ -16,8 +19,8 @@
 
         // Set up dimensions and margins
         const margin = { top: 20, right: 20, bottom: 50, left: 50 };
-        const width = 800 - margin.left - margin.right;
-        const height = 400 - margin.top - margin.bottom;
+        const width = svg_width - margin.left - margin.right;
+        const height = svg_height - margin.top - margin.bottom;
 
         // Create SVG container
         const svg = d3.select("#ghi")
@@ -97,91 +100,117 @@
     });
 }
 
-function draw_npv(){
-
-
+function draw_npv() {
     // Fetch data from the endpoint
-    fetch("/npv-graphh")
-        .then(response => response.json())
+    d3.json('/npv-graph')
         .then(data => {
-            // Convert JSON into an array of points
-            const dataset = Object.entries(data).map(([index, value]) => ({
-                x: +index,
-                y: +value
-            }));
+            // Validate and transform data into a consistent format
+            const formatter = new Intl.NumberFormat('en-US');
+            const dataset = Object.entries(data)
+                .map(([index, value]) => ({
+                    x: +index,
+                    y: +value
+                }))
+                .filter(d => !isNaN(d.x) && !isNaN(d.y)); // Remove invalid entries
 
-            createChart(dataset);
+            // Check if dataset is empty
+            if (dataset.length === 0) {
+                console.error("No valid data available for plotting.");
+                return;
+            }
+
+            const margin = { top: 20, right: 30, bottom: 40, left: 60 };
+            const width = svg_width - margin.left - margin.right;
+            const height = svg_height - margin.top - margin.bottom;
+
+            // Create SVG canvas
+            const svg = d3.select("#npv")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            // Set up scales
+            const xScale = d3.scaleLinear()
+                .domain(d3.extent(dataset, d => d.x)) // Input range
+                .range([0, width]); // Output range
+
+            const yMin = d3.min(dataset, d => d.y);
+            const yMax = d3.max(dataset, d => d.y);
+
+            const yScale = d3.scaleLinear()
+                .domain(yMin === yMax ? [yMin - 1, yMax + 1] : [yMin, yMax]) // Avoid constant domain
+                .range([height, 0]);
+
+            // Add x-axis
+            svg.append("g")
+                .attr("transform", `translate(0, ${height})`)
+                .attr("class", "axis")
+                .call(d3.axisBottom(xScale));
+
+            // Add y-axis
+            svg.append("g")
+                .attr("class", "axis")
+                .call(d3.axisLeft(yScale));
+
+            // Add dashed line at y = 0 (only if 0 is within domain)
+            if (yMin <= 0 && yMax >= 0) {
+                svg.append("line")
+                    .attr("class", "dashed-line")
+                    .attr("x1", 0)
+                    .attr("y1", yScale(0))
+                    .attr("x2", width)
+                    .attr("y2", yScale(0))
+                    .style("stroke", "gray")
+                    .style("stroke-dasharray", "4");
+            }
+
+            // Define line generator
+            const line = d3.line()
+                .x(d => xScale(d.x))
+                .y(d => yScale(d.y));
+
+            // Add line path
+            svg.append("path")
+                .datum(dataset)
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-width", 2)
+                .attr("d", line);
+
+            const tooltip = d3.select(".tooltip");
+
+            // Add points
+            svg.selectAll(".dot")
+                .data(dataset)
+                .enter()
+                .append("circle")
+                .attr("cx", d => xScale(d.x))
+                .attr("cy", d => yScale(d.y))
+                .attr("r", 4)
+                .attr("fill", "steelblue")
+                .on("mouseover", function (event, d) {
+                    tooltip.style("opacity", 1)
+                        .html(`Period: ${d.x}<br>NPV: ${d.y.toFixed(2)} USD`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 20) + "px");
+                })
+                .on("mousemove", function (event) {
+
+                    tooltip.style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 20) + "px");
+                })
+                .on("mouseout", function () {
+
+                    tooltip.style("opacity", 0);
+                });;
         })
-        .catch(error => console.error('Error fetching data:', error));
-
-    function createChart(data) {
-        const margin = { top: 20, right: 30, bottom: 40, left: 50 };
-        const width = 800 - margin.left - margin.right;
-        const height = 400 - margin.top - margin.bottom;
-
-        // Create SVG canvas
-        const svg = d3.select("#npv")
-            .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top})`);
-
-        // Set up scales
-        const xScale = d3.scaleLinear()
-            .domain(d3.extent(data, d => d.x)) // Input range
-            .range([0, width]); // Output range
-
-        const yScale = d3.scaleLinear()
-            .domain([
-                d3.min(data, d => d.y),
-                d3.max(data, d => d.y)
-            ])
-            .range([height, 0]);
-
-        // Add x-axis
-        svg.append("g")
-            .attr("transform", `translate(0, ${height})`)
-            .attr("class", "axis")
-            .call(d3.axisBottom(xScale));
-
-        // Add y-axis
-        svg.append("g")
-            .attr("class", "axis")
-            .call(d3.axisLeft(yScale));
-
-        // Add dashed line at y = 0
-        svg.append("line")
-            .attr("class", "dashed-line")
-            .attr("x1", 0)
-            .attr("y1", yScale(0))
-            .attr("x2", width)
-            .attr("y2", yScale(0));
-
-        // Define line generator
-        const line = d3.line()
-            .x(d => xScale(d.x))
-            .y(d => yScale(d.y));
-
-        // Add line path
-        svg.append("path")
-            .datum(data)
-            .attr("fill", "none")
-            .attr("stroke", "steelblue")
-            .attr("stroke-width", 2)
-            .attr("d", line);
-
-        // Add points
-        svg.selectAll(".dot")
-            .data(data)
-            .enter()
-            .append("circle")
-            .attr("cx", d => xScale(d.x))
-            .attr("cy", d => yScale(d.y))
-            .attr("r", 4)
-            .attr("fill", "steelblue");
-    }
-    
+        .catch(error => {
+            console.error("Error fetching or processing data:", error);
+        });
 }
+
+
  
  

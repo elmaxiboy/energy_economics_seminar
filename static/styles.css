@@ -4,35 +4,58 @@ body {
     padding: 0;
 }
 
-h1 {
+h1,h2 {
     text-align: center;
     margin-bottom: 20px;
 }
 
 form {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 20px;
+    max-width: 400px; /* Restrict the form's width */
+    margin: 20px auto; /* Center the form horizontally and add some vertical margin */
+    padding: 15px; /* Add padding inside the form */
+    border: 1px solid #ccc; /* Add a border for a clean look */
+    border-radius: 8px; /* Optional: Rounded corners */
+    background-color: #f9f9f9; /* Optional: Light background for contrast */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Subtle shadow for depth */
 }
 
-label, input, button {
-    font-size: 14px;
+form label {
+    display: block; /* Make labels block-level to align them with inputs */
+    margin-bottom: 5px; /* Add spacing between the label and input */
+    font-size: 14px; /* Optional: Adjust font size for labels */
+    color: #333; /* Optional: Set label color */
 }
 
-label {
-    margin-right: 5px;
+form input {
+    width: 100%; /* Make inputs fill the form's width */
+    padding: 8px; /* Add padding for better usability */
+    margin-bottom: 10px; /* Add spacing between inputs */
+    border: 1px solid #ccc; /* Add a border for inputs */
+    border-radius: 4px; /* Optional: Rounded corners for inputs */
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
 }
 
-input {
-    width: 100%;
-    box-sizing: border-box;
+form button {
+    display: block; /* Center-align the button */
+    width: 100%; /* Make the button fill the form's width */
+    padding: 10px; /* Add padding for the button */
+    background-color: #007bff; /* Primary button color */
+    color: #fff; /* White text color */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Optional: Rounded corners */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    font-size: 16px; /* Adjust font size */
 }
 
-button {
-    grid-column: span 2;
-    padding: 10px;
-    font-size: 16px;
+form button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Optional: Add responsiveness for smaller screens */
+@media (max-width: 480px) {
+    form {
+        max-width: 90%; /* Make the form take up most of the screen width on small devices */
+    }
 }
 
 table {
@@ -58,17 +81,34 @@ img {
 }
 
 .results {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
+    display: inline-block; 
     gap: 10px;
     margin-top: 20px;
+    max-width: 100%; /* Ensure container doesn't exceed its available width */
+    box-sizing: border-box;
 }
 
 .results > div {
+    
     padding: 10px;
+    margin: 10px;
     border: 1px solid #ccc;
     background-color: #f9f9f9;
+    box-sizing: border-box;
+    justify-content: center;
+    border: 1px solid #ccc; /* Add a border for a clean look */
+    border-radius: 8px; /* Optional: Rounded corners */
+
 }
+
+
+/* Optional: For smaller screen sizes, adjust the layout */
+@media (max-width: 768px) {
+    .results > div {
+        flex: 1 1 100%; /* On smaller screens, make each item take up the full width */
+    }
+}
+
 
 .results h3 {
     margin-top: 0;
@@ -109,4 +149,8 @@ img {
 .dashed-line {
     stroke: gray;
     stroke-dasharray: 4;
+}
+
+.dot:hover {
+    fill: darkorange;
 }
