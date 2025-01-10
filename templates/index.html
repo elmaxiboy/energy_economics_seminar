@@ -49,33 +49,27 @@
     <div class="results">
         <div>
             <h3>Summary</h3>
-            <p><strong>Produced Energy:</strong> {{ energy_output2 | format_number }} MWh/year</p>
+            <p><strong>Produced Energy:</strong> {{ energy_output | format_number }} MWh/year</p>
             <p><strong>Estimated Cap. Factor:</strong> {{ cap_factor | format_number }} </p>
             <p><strong>Total H2 Production:</strong> {{ total_h2_production | format_number }} kg/year</p>
             <p><strong>Annual Revenue:</strong> {{ annual_revenue | format_number }} USD</p>
             <p><strong>NPV:</strong> {{ npv | format_number }} USD</p>
             
         </div>
-        <div>
-            <h3>NPV Graph</h3>
-            <img 
-            src="{{ url_for('npv_graph', **{
-                'project_lifetime': inputs.project_lifetime,
-                'discount_rate': inputs.discount_rate,
-                'capex': inputs.capex,
-                'opex': inputs.opex,
-                'h2_efficiency': inputs.h2_efficiency,
-                'h2_price': inputs.h2_price,
-                'installed_cap': inputs.installed_cap
-            }) }}"
-            alt="NPV Graph">
-        </div>
-        <div>
+
+        <div id="ghi">
             <h2>Average Daily Global Horizontal Irradiance</h2>
-            <svg width="600" height="300"></svg>
             <div class="tooltip"></div>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
             <script>draw_ghi()</script>
+
+        </div>
+
+        <div id="npv">
+            <h2>Net present Value</h2>
+            <div class="tooltip"></div>
+            <script src="{{ url_for('static', filename='charts.js') }}"></script>
+            <script>draw_npv()</script>
 
         </div>
     </div>

@@ -105,3 +105,8 @@ img {
     pointer-events: none;
     opacity: 0;
 }
+
+.dashed-line {
+    stroke: gray;
+    stroke-dasharray: 4;
+}

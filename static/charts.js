@@ -20,7 +20,8 @@
         const height = 400 - margin.top - margin.bottom;
 
         // Create SVG container
-        const svg = d3.select("svg")
+        const svg = d3.select("#ghi")
+            .append('svg')
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
@@ -97,6 +98,89 @@
 }
 
 function draw_npv(){
+
+
+    // Fetch data from the endpoint
+    fetch("/npv-graphh")
+        .then(response => response.json())
+        .then(data => {
+            // Convert JSON into an array of points
+            const dataset = Object.entries(data).map(([index, value]) => ({
+                x: +index,
+                y: +value
+            }));
+
+            createChart(dataset);
+        })
+        .catch(error => console.error('Error fetching data:', error));
+
+    function createChart(data) {
+        const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+        const width = 800 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+
+        // Create SVG canvas
+        const svg = d3.select("#npv")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Set up scales
+        const xScale = d3.scaleLinear()
+            .domain(d3.extent(data, d => d.x)) // Input range
+            .range([0, width]); // Output range
+
+        const yScale = d3.scaleLinear()
+            .domain([
+                d3.min(data, d => d.y),
+                d3.max(data, d => d.y)
+            ])
+            .range([height, 0]);
+
+        // Add x-axis
+        svg.append("g")
+            .attr("transform", `translate(0, ${height})`)
+            .attr("class", "axis")
+            .call(d3.axisBottom(xScale));
+
+        // Add y-axis
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(yScale));
+
+        // Add dashed line at y = 0
+        svg.append("line")
+            .attr("class", "dashed-line")
+            .attr("x1", 0)
+            .attr("y1", yScale(0))
+            .attr("x2", width)
+            .attr("y2", yScale(0));
+
+        // Define line generator
+        const line = d3.line()
+            .x(d => xScale(d.x))
+            .y(d => yScale(d.y));
+
+        // Add line path
+        svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "steelblue")
+            .attr("stroke-width", 2)
+            .attr("d", line);
+
+        // Add points
+        svg.selectAll(".dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", d => xScale(d.x))
+            .attr("cy", d => yScale(d.y))
+            .attr("r", 4)
+            .attr("fill", "steelblue");
+    }
     
 }
  
