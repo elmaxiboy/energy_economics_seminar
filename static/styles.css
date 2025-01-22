@@ -9,15 +9,32 @@ h1,h2 {
     margin-bottom: 20px;
 }
 
+.calculator{
+    display: flex;
+    justify-content: center;
+}
+.menu-parent{
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+
+}
+
 form {
-    max-width: 400px; /* Restrict the form's width */
-    margin: 20px auto; /* Center the form horizontally and add some vertical margin */
+    display: inline-grid;
     padding: 15px; /* Add padding inside the form */
     border: 1px solid #ccc; /* Add a border for a clean look */
     border-radius: 8px; /* Optional: Rounded corners */
     background-color: #f9f9f9; /* Optional: Light background for contrast */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Subtle shadow for depth */
+    justify-items: center;
 }
+
+.menu_child{
+    padding-inline: 20px;
+}
+
 
 form label {
     display: block; /* Make labels block-level to align them with inputs */
@@ -35,16 +52,18 @@ form input {
     box-sizing: border-box; /* Ensure padding doesn't affect width */
 }
 
+
+
 form button {
-    display: block; /* Center-align the button */
-    width: 100%; /* Make the button fill the form's width */
-    padding: 10px; /* Add padding for the button */
-    background-color: #007bff; /* Primary button color */
-    color: #fff; /* White text color */
-    border: none; /* Remove default border */
-    border-radius: 4px; /* Optional: Rounded corners */
-    cursor: pointer; /* Change cursor to pointer on hover */
-    font-size: 16px; /* Adjust font size */
+
+    padding: 8px 20px; /* Adjust padding for a smaller button */
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px; /* Smaller font size */
+
 }
 
 form button:hover {
@@ -59,19 +78,32 @@ form button:hover {
 }
 
 table {
-    width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin: 20px 0;
 }
-
 th, td {
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     padding: 8px;
     text-align: center;
 }
-
 th {
     background-color: #f4f4f4;
+    font-weight: bold;
+}
+.positive {
+    background-color: #d4edda; /* Greenish */
+}
+.negative {
+    background-color: #f8d7da; /* Reddish */
+}
+tr.highlighted {
+    background-color: #d4edda; /* Light green background */
+    font-weight: bold;
+    border: 2px dotted black;
+}
+tfoot td {
+    font-weight: bold;
+    background-color: #f1f1f1; /* Optional: light gray for contrast */
 }
 
 img {
@@ -80,34 +112,30 @@ img {
     max-width: 100%;
 }
 
+
+
 .results {
-    display: inline-block; 
+    display: flex; 
     gap: 10px;
-    margin-top: 20px;
-    max-width: 100%; /* Ensure container doesn't exceed its available width */
-    box-sizing: border-box;
-}
-
-.results > div {
-    
-    padding: 10px;
+    flex-wrap: wrap;
     margin: 10px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    box-sizing: border-box;
     justify-content: center;
-    border: 1px solid #ccc; /* Add a border for a clean look */
+
+}
+
+
+
+.results  div {
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #f9f9f9;
+    justify-content: center;
     border-radius: 8px; /* Optional: Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
 }
 
 
-/* Optional: For smaller screen sizes, adjust the layout */
-@media (max-width: 768px) {
-    .results > div {
-        flex: 1 1 100%; /* On smaller screens, make each item take up the full width */
-    }
-}
 
 
 .results h3 {
@@ -153,4 +181,11 @@ img {
 
 .dot:hover {
     fill: darkorange;
+}
+
+#map { 
+    margin: 10px;
+    height: 300px;
+    width: 200px;
+    border-radius: 8px;
 }

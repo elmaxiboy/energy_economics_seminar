@@ -67,3 +67,19 @@ class project:
     def calculate_irr(self):
         self.irr= npf.irr(self.cash_flows)*100
         return json.dumps(self.irr)
+    
+    def get_irr(self):
+        return json.dumps(self.irr)
+    
+    def get_cash_flows(self):
+    
+        keys = ["year", "cash_flow", "disc_cash_flow","cum_npv"]
+        years=[]
+        
+        for i in range(0, self.project_lifetime+1):
+            years.append(i)
+
+        json_data = [dict(zip(keys, values)) for values in zip(years, self.cash_flows, self.discounted_cash_flows, self.cum_npv)]
+
+        json_output = json.dumps(json_data, indent=4)
+        return json_output    

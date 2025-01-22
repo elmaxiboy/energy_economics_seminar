@@ -1,5 +1,5 @@
- const svg_width = 800
- const svg_height = 400
+const svg_W = 600
+const svg_H = 300
  
  function draw_ghi(){
     // Load the JSON data
@@ -18,9 +18,9 @@
         );
 
         // Set up dimensions and margins
-        const margin = { top: 20, right: 20, bottom: 50, left: 50 };
-        const width = svg_width - margin.left - margin.right;
-        const height = svg_height - margin.top - margin.bottom;
+        let margin = { top: 20, right: 20, bottom: 50, left: 50 };
+        let width = svg_W - margin.left - margin.right;
+        let height = svg_H - margin.top - margin.bottom;
 
         // Create SVG container
         const svg = d3.select("#ghi")
@@ -119,9 +119,9 @@ function draw_npv() {
                 return;
             }
 
-            const margin = { top: 20, right: 30, bottom: 40, left: 60 };
-            const width = svg_width - margin.left - margin.right;
-            const height = svg_height - margin.top - margin.bottom;
+            let margin = { top: 20, right: 30, bottom: 40, left: 60 };
+            let width = svg_W - margin.left - margin.right;
+            let height = svg_H - margin.top - margin.bottom;
 
             // Create SVG canvas
             const svg = d3.select("#npv")
@@ -211,6 +211,73 @@ function draw_npv() {
         });
 }
 
+function draw_cash_flows(){
 
+    // Fetch JSON data
+    d3.json("/cash-flows")
+        .then(data => {
+            createTable(data);
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+        });
+
+    function createTable(data) {
+        const table = d3.select("#data-table");
+
+        // Extract column names from the JSON
+        const columns = Object.keys(data[0]);
+
+        // Add table header
+        const thead = table.append("thead").append("tr");
+        thead.selectAll("th")
+            .data(columns)
+            .enter()
+            .append("th")
+            .text(d => d);
+
+        // Add table body
+        const tbody = table.append("tbody");
+        const rows = tbody.selectAll("tr")
+            .data(data)
+            .enter()
+            .append("tr")
+            .attr("class", (row, i) => {
+                if (row.cum_npv > 0 && tbody.selectAll("tr.highlighted").empty()) {
+                    return "highlighted"; // Highlight the first positive cum_npv row
+                }
+                return null;
+            });
+
+        rows.selectAll("td")
+            .data(row => columns.map(col => ({ key: col, value: formatNumber(row[col]) })))
+            .enter()
+            .append("td")
+            .text(d => d.value)
+            .attr("class", d => (typeof d.value === "number" && d.key !== "year")
+                ? (d.value >= 0 ? "positive" : "negative")
+                : "");
+
+        // Add table footer for totals
+        const tfoot = table.append("tfoot").append("tr");
+        tfoot.selectAll("td")
+            .data(columns)
+            .enter()
+            .append("td")
+            .text((col, i) => {
+                if (i === 0) return "Total"; // First column (year) shows "Total"
+                const total = data.reduce((sum, row) => sum + (row[col] || 0), 0);
+                return col !== "year" ? formatNumber(total) : ""; // Skip totals for "year"
+            })
+            .style("font-weight", "bold"); // Make the total row bold
+    }
+}
+
+function formatNumber(value) {
+    if (typeof value === "number") {
+        return Number(value.toFixed(2)); // Rounds to 2 decimals and returns as a number
+    }
+    return value;
+}
  
  

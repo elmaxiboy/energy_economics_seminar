@@ -84,6 +84,11 @@ def irr():
     irr=p.get_irr()
     return irr
 
+@app.route("/cash-flows", methods=["GET", "POST"])
+def cash_flows():  
+    cash_flows=p.get_cash_flows()
+    return cash_flows
+
 
 
 @app.template_filter("format_number")

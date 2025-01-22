@@ -5,57 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+
     <title>Advanced Seminar</title>
 </head>
 <body>
     <h1>NPV Calculator:</h1>
     <h2>PV ☀️ + H2 💧</h2>
+    <div class="calculator">
+        <form method="post">
+            <div class="menu-parent">
+
+                <div class="menu_child" id="finance">
+                    <h3>Economics</h3>
+                    <label for="project_lifetime">Project Lifetime (years):</label>
+                    <input type="number" id="project_lifetime" name="project_lifetime" value="{{ inputs.project_lifetime }}" placeholder="Project Lifetime (years)" required>
+            
+                    <label for="discount_rate">Discount Rate (%):</label>
+                    <input type="number" step="0.000000000000000001" id="discount_rate" name="discount_rate" value="{{ inputs.discount_rate }}" placeholder="Discount Rate (%)" required>
+            
+                    <label for="capex">CAPEX (USD):</label>
+                    <input type="number" step="0.1" id="capex" name="capex" value="{{ inputs.capex }}" placeholder="CAPEX (USD)" required>
+            
+                    <label for="opex">OPEX (USD):</label>
+                    <input type="number" step="0.1" id="opex" name="opex" value="{{ inputs.opex }}" placeholder="OPEX (USD)" required>
+                </div>
+               
+                <div class="menu_child" id="solar_plant">
+                    <h3>Solar Plant</h3>
+                    <label for="latitude">Latitude:</label>
+                    <input type="number" step="0.000001" id="latitude" name="latitude" value="{{ inputs.latitude }}" placeholder="Latitude" required>
+                    
+                    <label for="longitude">Longitude:</label>
+                    <input type="number" step="0.000001" id="longitude" name="longitude" value="{{ inputs.longitude }}" placeholder="Longitude" required>
+                    
+                    <label for="prod_decline">Solar Plant Production Decline:</label>
+                    <input type="number" step="0.1" id="prod_decline" name="prod_decline" value="{{ inputs.prod_decline }}" placeholder="Production Decline">
+                    
+                    <label for="installed_cap">Solar Plant Installed Capacity (MW):</label>
+                    <input type="number" step="0.1" id="installed_cap" name="installed_cap" value="{{ inputs.installed_cap }}" placeholder="Installed Capacity" required>
     
-    <form method="post">
-        <!-- Input fields -->
-        <label for="project_lifetime">Project Lifetime (years):</label>
-        <input type="number" id="project_lifetime" name="project_lifetime" value="{{ inputs.project_lifetime }}" placeholder="Project Lifetime (years)" required>
+                </div>
+    
+                <div class="menu_child" id="h2_plant">
+                    <h3>H2 Plant</h3>
+                    <label for="h2_efficiency">H2 Efficiency (%):</label>
+                    <input type="number" step="1" id="h2_efficiency" name="h2_efficiency" value="{{ inputs.h2_efficiency }}" placeholder="H2 Efficiency (%)" required>
+                    
+                    <label for="h2_price">H2 Price (USD/kg):</label>
+                    <input type="number" step="0.1" id="h2_price" name="h2_price" value="{{ inputs.h2_price }}" placeholder="H2 Price (USD/kg)" required>
+                </div>
+                <div class="menu_child" id="map">
+                        <script src="{{ url_for('static', filename='map.js') }}"></script>
+                        <script></script>
+                </div>
 
-        <label for="discount_rate">Discount Rate (%):</label>
-        <input type="number" step="0.000000000000000001" id="discount_rate" name="discount_rate" value="{{ inputs.discount_rate }}" placeholder="Discount Rate (%)" required>
 
-        <label for="capex">CAPEX (USD):</label>
-        <input type="number" step="0.1" id="capex" name="capex" value="{{ inputs.capex }}" placeholder="CAPEX (USD)" required>
+            </div>
 
-        <label for="opex">OPEX (USD):</label>
-        <input type="number" step="0.1" id="opex" name="opex" value="{{ inputs.opex }}" placeholder="OPEX (USD)" required>
+            <button  type="submit">Calculate</button>        
+        </form>
+    </div>
 
-        <label for="latitude">Latitude:</label>
-        <input type="number" step="0.000001" id="latitude" name="latitude" value="{{ inputs.latitude }}" placeholder="Latitude" required>
 
-        <label for="longitude">Longitude:</label>
-        <input type="number" step="0.000001" id="longitude" name="longitude" value="{{ inputs.longitude }}" placeholder="Longitude" required>
 
-        <label for="prod_decline">Solar Plant Production Decline:</label>
-        <input type="number" step="0.1" id="prod_decline" name="prod_decline" value="{{ inputs.prod_decline }}" placeholder="Production Decline">
-        
-        <label for="installed_cap">Solar Plant Installed Capacity (MW):</label>
-        <input type="number" step="0.1" id="installed_cap" name="installed_cap" value="{{ inputs.installed_cap }}" placeholder="Installed Capacity" required>
 
-        <label for="h2_efficiency">H2 Efficiency (%):</label>
-        <input type="number" step="1" id="h2_efficiency" name="h2_efficiency" value="{{ inputs.h2_efficiency }}" placeholder="H2 Efficiency (%)" required>
-
-        <label for="h2_price">H2 Price (USD/kg):</label>
-        <input type="number" step="0.1" id="h2_price" name="h2_price" value="{{ inputs.h2_price }}" placeholder="H2 Price (USD/kg)" required>
-
-        <button type="submit">Calculate</button>
-    </form>
 
     {% if npv is not none %}
     <div class="results">
-        <div>
-            <h3>Summary</h3>
-            <p><strong>Produced Energy:</strong> {{ energy_output | format_number }} MWh/year</p>
-            <p><strong>Estimated Cap. Factor:</strong> {{ cap_factor | format_number }} </p>
-            <p><strong>Total H2 Production:</strong> {{ total_h2_production | format_number }} kg/year</p>
-            <p><strong>Annual Revenue:</strong> {{ annual_revenue | format_number }} USD</p>
-            <p><strong>NPV:</strong> {{ npv | format_number }} USD</p>
-            <p><strong>IRR:</strong> {{ irr }} %</p>         
+
+        <div id="summary">
+            <h2>Summary</h2>
+            <p><strong>Produced Energy:</strong> <br> {{ energy_output | format_number }} MWh/year</p>
+            <p><strong>Estimated Cap. Factor:</strong> <br>{{ cap_factor | format_number }} </p>
+            <p><strong>Total H2 Production:</strong> <br> {{ total_h2_production | format_number }} kg/year</p>
+            <p><strong>Annual Revenue:</strong> <br> {{ annual_revenue | format_number }} USD</p>
+            <p><strong>NPV:</strong> <br>{{ npv | format_number }} USD</p>
+            <p><strong>IRR:</strong> <br>{{ irr }} %</p>         
         </div>
 
         <div id="ghi">
@@ -71,37 +102,17 @@
             <div class="tooltip"></div>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
             <script>draw_npv()</script>
-
         </div>
 
+        <div id="cashflows">
+            <h2>Cash Flows</h2>
+            <script src="{{ url_for('static', filename='charts.js') }}"></script>
+            <table id="data-table"></table>
+            <script>draw_cash_flows()</script>
+        </div>
 
-
-        
     </div>
 
-    <h3>Cash Flows</h3>
-    <table>
-        <tr>
-            <th>Year</th>
-            <th>Cash Flow</th>
-            <th>Discounted Cash Flow</th>
-            <th>Cumulated NPV</th>
-        </tr>
-        {% for year, cash_flow, discounted_cf, cum_npv in cash_flow_table %}
-        <tr>
-            <td>{{ year }}</td>
-            <td>{{ cash_flow | round(2) | format_number }}</td>
-            <td>{{ discounted_cf | round(2) | format_number }}</td>
-            <td>{{ cum_npv | round(2) | format_number }}</td>
-        </tr>
-        {% endfor %}
-        <tr>
-            <td><strong>Total</strong></td>
-            <td><strong>{{ total_cash_flow | format_number }}</strong></td>
-            <td><strong>{{ total_discounted_cash_flow | format_number }}</strong></td>
-            <td><strong>{{ total_cum_npv | format_number }}</strong></td>
-        </tr>
-    </table>
     {% endif %}
 </body>
 </html>
