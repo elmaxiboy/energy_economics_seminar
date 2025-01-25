@@ -34,6 +34,13 @@
             
                     <label for="opex">OPEX (USD):</label>
                     <input type="number" step="0.1" id="opex" name="opex" value="{{ inputs.opex }}" placeholder="OPEX (USD)" required>
+                    
+                    <label for="inflation_rate">Inflation Rate (%):</label>
+                    <input type="number" step="0.1" id="inflation_rate" name="inflation_rate" value="{{ inputs.inflation_rate }}" placeholder="Inflation rate" required>
+
+                    <label for="tax_rate">Tax Rate (%):</label>
+                    <input type="number" step="0.1" id="tax_rate" name="tax_rate" value="{{ inputs.tax_rate }}" placeholder="Tax rate" required>
+                    
                 </div>
                
                 <div class="menu_child" id="solar_plant">
@@ -44,9 +51,12 @@
                     <label for="longitude">Longitude:</label>
                     <input type="number" step="0.000001" id="longitude" name="longitude" value="{{ inputs.longitude }}" placeholder="Longitude" required>
                     
-                    <label for="prod_decline">Solar Plant Production Decline:</label>
-                    <input type="number" step="0.1" id="prod_decline" name="prod_decline" value="{{ inputs.prod_decline }}" placeholder="Production Decline">
+                    <label for="prod_decline">Solar Plant Production Decline (%):</label>
+                    <input type="number" step="0.01" id="prod_decline" name="prod_decline" value="{{ inputs.prod_decline }}" placeholder="Production Decline" required>
                     
+                    <label for="panel_efficiency">Panel's Efficiency (%):</label>
+                    <input type="number" step="0.1" id="panel_efficiency" name="panel_efficiency" value="{{ inputs.panel_efficiency }}" placeholder="Panel's efficiency">
+
                     <label for="installed_cap">Solar Plant Installed Capacity (MW):</label>
                     <input type="number" step="0.1" id="installed_cap" name="installed_cap" value="{{ inputs.installed_cap }}" placeholder="Installed Capacity" required>
     
@@ -54,8 +64,8 @@
     
                 <div class="menu_child" id="h2_plant">
                     <h3>H2 Plant</h3>
-                    <label for="h2_efficiency">H2 Efficiency (%):</label>
-                    <input type="number" step="1" id="h2_efficiency" name="h2_efficiency" value="{{ inputs.h2_efficiency }}" placeholder="H2 Efficiency (%)" required>
+                    <label for="electrolyzers_efficiency">Electrolyzer's Efficiency (%):</label>
+                    <input type="number" step="1" id="electrolyzers_efficiency" name="electrolyzers_efficiency" value="{{ inputs.electrolyzers_efficiency }}" placeholder="Electrolyzer's Efficiency (%)" required>
                     
                     <label for="h2_price">H2 Price (USD/kg):</label>
                     <input type="number" step="0.1" id="h2_price" name="h2_price" value="{{ inputs.h2_price }}" placeholder="H2 Price (USD/kg)" required>
@@ -84,7 +94,6 @@
             <p><strong>Produced Energy:</strong> <br> {{ energy_output | format_number }} MWh/year</p>
             <p><strong>Estimated Cap. Factor:</strong> <br>{{ cap_factor | format_number }} </p>
             <p><strong>Total H2 Production:</strong> <br> {{ total_h2_production | format_number }} kg/year</p>
-            <p><strong>Annual Revenue:</strong> <br> {{ annual_revenue | format_number }} USD</p>
             <p><strong>NPV:</strong> <br>{{ npv | format_number }} USD</p>
             <p><strong>IRR:</strong> <br>{{ irr }} %</p>         
         </div>
@@ -103,12 +112,20 @@
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
             <script>draw_npv()</script>
         </div>
-
+    </div>
+    <div class="results">
         <div id="cashflows">
             <h2>Cash Flows</h2>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
-            <table id="data-table"></table>
+            <table id="data-table-cash-flows"></table>
             <script>draw_cash_flows()</script>
+        </div>
+
+        <div id="depreciation_schedule">
+            <h2>Depreciation Schedule</h2>
+            <script src="{{ url_for('static', filename='charts.js') }}"></script>
+            <table id="data-table-depreciation-schedule"></table>
+            <script>draw_depreciation_schedule()</script>
         </div>
 
     </div>

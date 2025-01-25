@@ -97,9 +97,8 @@ th {
     background-color: #f8d7da; /* Reddish */
 }
 tr.highlighted {
-    background-color: #d4edda; /* Light green background */
     font-weight: bold;
-    border: 2px dotted black;
+    border: 3px dotted black;
 }
 tfoot td {
     font-weight: bold;
@@ -175,7 +174,7 @@ img {
 }
 
 .dashed-line {
-    stroke: gray;
+    stroke: red;
     stroke-dasharray: 4;
 }
 
