@@ -183,16 +183,43 @@ class project:
 
 def get_sensitivity_analysis(reference_project : project):
 
-    analysis_project = copy.deepcopy(reference_project)
+    keys = ["panel_efficiency","production_decline"]
+    dict_shifted_npv = dict()
 
-    setattr(analysis_project.solar_plant,
-            "panel_efficiency",
-            getattr(analysis_project.solar_plant,"panel_efficiency")*1.1)
     
-    analysis_project.solar_plant.calculate_annual_production()
-    analysis_project.solar_plant.calculate_capacity_factor()
 
-    shifted_npv=analysis_project.calculate_npv().npv
-    
-    return json.dumps(shifted_npv)    
+    for key in keys:
+            
+            analysis_project_up = copy.deepcopy(reference_project)
+            analysis_project_down = copy.deepcopy(reference_project)
+            
+            values=dict()
+
+            setattr(analysis_project_up.solar_plant,
+                key,
+                getattr(analysis_project_up.solar_plant,key)*1.1)
+            
+            setattr(analysis_project_down.solar_plant,
+                key,
+                getattr(analysis_project_down.solar_plant,key)*0.9)
+
+            match key: 
+                case "panel_efficiency":
+
+                    analysis_project_up.solar_plant.calculate_annual_production()
+                    analysis_project_up.solar_plant.calculate_capacity_factor()
+
+                    analysis_project_down.solar_plant.calculate_annual_production()
+                    analysis_project_down.solar_plant.calculate_capacity_factor()
+
+            shifted_npv_up=analysis_project_up.calculate_npv().npv
+            shifted_npv_down=analysis_project_down.calculate_npv().npv
+
+            values["up"]=shifted_npv_up
+            values["down"]=shifted_npv_down
+
+            dict_shifted_npv[key]=values     
+
+
+    return json.dumps(dict_shifted_npv)    
     
