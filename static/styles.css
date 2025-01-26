@@ -146,6 +146,15 @@ img {
     fill: orange;
 }
 
+.bar-down {
+    fill: #ce4f4f ;
+}
+
+.bar-up {
+    fill: #44ac5c ;
+}
+
+
 .bar:hover {
     fill: darkorange;
 }
@@ -188,3 +197,19 @@ img {
     width: 200px;
     border-radius: 8px;
 }
+
+.label {
+    font-size: 12px;
+    text-anchor: middle;
+}
+
+#slider {
+    font-size: 0.9rem; 
+    line-height: 1.4;
+}
+
+#slider_input {
+    margin-bottom: 0; 
+}
+
+

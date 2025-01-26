@@ -19,7 +19,14 @@ default_values = {
         "longitude":87.511127,
         "panel_efficiency": 22,
         "inflation_rate": 2.75,
-        "prod_decline":0.5
+        "prod_decline":0.5,
+        "tangible_capex":0.2,
+        "intangible_capex":0.8,
+        "slider_input":0.2,
+        "depr_periods_tangible_capex":10,
+        "depr_periods_related_capex":15,
+        "related_capex_factor":11,
+        "opex_increase_rate":0.025
     }
 
 def calculate_hydrogen_from_energy(mwh, efficiency):

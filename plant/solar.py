@@ -17,6 +17,8 @@ class solar:
         self.panel_efficiency= panel_efficiency
         self.production_decline= production_decline
         self.land_required=None
+        self.last_latitude = None
+        self.last_longitude = None
 
 
     def calculate_annual_production(self):
@@ -44,27 +46,32 @@ class solar:
     
 
     def calculate_avg_monthly_ghi(self):
+
         api_url = f"https://power.larc.nasa.gov/api/temporal/monthly/point?start=2000&end=2022&latitude={self.latitude}&longitude={self.longitude}&community=RE&parameters=ALLSKY_SFC_SW_DWN&format=JSON"  
         response = requests.get(api_url)
+        if response.status_code != 200:
+            raise Exception("Failed to retrieve solar radiation data.") 
+    
         data = response.json()
         data = data['properties']['parameter']
-
+        
         # Convert the dictionary to a DataFrame
         df = pd.DataFrame(list(data['ALLSKY_SFC_SW_DWN'].items()), columns=['yearMonth', 'radiation'])
-
+        
         # Format dataframe
+        
         df['month'] = df['yearMonth'].str[-2:]
         df['year'] = df['yearMonth'].str[:4]
         df = df.drop(df[df['month'] == '13'].index)
         df=df.drop('yearMonth',axis=1)
         df= df.groupby('month')['radiation'].mean().round(2)
-
+        
         # Group by the month and calculate the mean
+        
         self.avg_monthly_ghi = df.to_json()
-
-        if response.status_code != 200:
-            raise Exception("Failed to retrieve solar radiation data.")       
-
+        self.last_latitude = self.latitude
+        self.last_longitude = self.longitude
+        
         return self.avg_monthly_ghi
     
     def calculate_capacity_factor(self):

@@ -24,7 +24,7 @@
                 <div class="menu_child" id="finance">
                     <h3>Economics</h3>
                     <label for="project_lifetime">Project Lifetime (years):</label>
-                    <input type="number" id="project_lifetime" name="project_lifetime" value="{{ inputs.project_lifetime }}" placeholder="Project Lifetime (years)" required>
+                    <input type="number" id="project_lifetime" min= 1 name="project_lifetime" value="{{ inputs.project_lifetime }}" placeholder="Project Lifetime (years)" required>
             
                     <label for="discount_rate">Discount Rate (%):</label>
                     <input type="number" step="0.000000000000000001" id="discount_rate" name="discount_rate" value="{{ inputs.discount_rate }}" placeholder="Discount Rate (%)" required>
@@ -36,11 +36,36 @@
                     <input type="number" step="0.1" id="opex" name="opex" value="{{ inputs.opex }}" placeholder="OPEX (USD)" required>
                     
                     <label for="inflation_rate">Inflation Rate (%):</label>
-                    <input type="number" step="0.1" id="inflation_rate" name="inflation_rate" value="{{ inputs.inflation_rate }}" placeholder="Inflation rate" required>
+                    <input type="number" step="0.01" id="inflation_rate" name="inflation_rate" value="{{ inputs.inflation_rate }}" placeholder="Inflation rate" required>
 
                     <label for="tax_rate">Tax Rate (%):</label>
-                    <input type="number" step="0.1" id="tax_rate" name="tax_rate" value="{{ inputs.tax_rate }}" placeholder="Tax rate" required>
+                    <input type="number" step="0.01" id="tax_rate" name="tax_rate" value="{{ inputs.tax_rate }}" placeholder="Tax rate" required>
                     
+                </div>
+
+
+                <div class="menu_child" id="slider">
+                    <h3>CAPEX/OPEX Specs</h3>
+
+                    <label for="related_capex_factor">Tangible vs Intangible CAPEX Ratio:</label>
+                    <input type="range" id="slider_input" name="slider_input" min="0" max="1" step="0.01" value="{{ inputs.slider_input }}" oninput="updateSliderValues()">
+                    <p>Tangible ratio : <span id="tangible_capex">{{ tangible_capex }}%</span></p>
+                    <p>Intangible ratio: <span id="intangible_capex">{{ intangible_capex }}%</span></p>
+                     
+                    <label for="related_capex_factor">Related Capex (%):</label>
+                    <input type="number" step="0.1"  min="0"  id="related_capex_factor" name="related_capex_factor" value="{{ inputs.related_capex_factor }}" placeholder="Related Capex factor" required>
+
+                    <label for="depr_periods_tangible_capex">Tangible CAPEX depreciation (years):</label>
+                    <input type="number" step="1"  min="0" max="{{ inputs.project_lifetime }}" id="depr_periods_tangible_capex" name="depr_periods_tangible_capex" value="{{ inputs.depr_periods_tangible_capex }}" placeholder="Tangible periods" required>
+                    
+                    <label for="depr_periods_related_capex">Related CAPEX depreciation (years):</label>
+                    <input type="number" step="1"  min="0" max="{{ inputs.project_lifetime }}" id="depr_periods_related_capex" name="depr_periods_related_capex" value="{{ inputs.depr_periods_related_capex }}" placeholder="Related periods" required>
+
+                    <label for="opex_increase_rate">OPEX Increase Rate (%):</label>
+                    <input type="number" step="0.001"  min="0"  id="opex_increase_rate" name="opex_increase_rate" value="{{ inputs.opex_increase_rate }}" placeholder="Opex annual increase rate" required>
+
+                    
+
                 </div>
                
                 <div class="menu_child" id="solar_plant">
@@ -65,10 +90,10 @@
                 <div class="menu_child" id="h2_plant">
                     <h3>H2 Plant</h3>
                     <label for="electrolyzers_efficiency">Electrolyzer's Efficiency (%):</label>
-                    <input type="number" step="1" id="electrolyzers_efficiency" name="electrolyzers_efficiency" value="{{ inputs.electrolyzers_efficiency }}" placeholder="Electrolyzer's Efficiency (%)" required>
+                    <input type="number" step="0.01" id="electrolyzers_efficiency" name="electrolyzers_efficiency" value="{{ inputs.electrolyzers_efficiency }}" placeholder="Electrolyzer's Efficiency (%)" required>
                     
                     <label for="h2_price">H2 Price (USD/kg):</label>
-                    <input type="number" step="0.1" id="h2_price" name="h2_price" value="{{ inputs.h2_price }}" placeholder="H2 Price (USD/kg)" required>
+                    <input type="number" step="0.0000000000000001" id="h2_price" name="h2_price" value="{{ inputs.h2_price }}" placeholder="H2 Price (USD/kg)" required>
                 </div>
                 <div class="menu_child" id="map">
                         <script src="{{ url_for('static', filename='map.js') }}"></script>
@@ -95,7 +120,9 @@
             <p><strong>Estimated Cap. Factor:</strong> <br>{{ cap_factor | format_number }} </p>
             <p><strong>Total H2 Production:</strong> <br> {{ total_h2_production | format_number }} kg/year</p>
             <p><strong>NPV:</strong> <br>{{ npv | format_number }} USD</p>
-            <p><strong>IRR:</strong> <br>{{ irr }} %</p>         
+            <p><strong>IRR:</strong> <br>{{ irr }} %</p>
+            <p><strong>H2 breakeven price:</strong> <br>{{ breakeven_price_h2}} USD/kg</p>
+
         </div>
 
         <div id="ghi">
@@ -113,6 +140,15 @@
             <script>draw_npv()</script>
         </div>
     </div>
+
+    <div class="results">
+        <div id="tornado_chart">
+            <h2>Sensitivity Analysis (+-10%)</h2>
+            <script src="{{ url_for('static', filename='charts.js') }}"></script>
+            <script>draw_sensitivity_tornado_chart()</script>
+        </div>
+    </div>
+
     <div class="results">
         <div id="cashflows">
             <h2>Cash Flows</h2>
@@ -129,6 +165,8 @@
         </div>
 
     </div>
+
+
 
     {% endif %}
 </body>

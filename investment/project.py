@@ -10,7 +10,12 @@ import math
 import copy
 
 class project:
-    def __init__(self,project_lifetime: int, interest_rate: float, capex: float, opex: float, inflation_rate: float, solar_plant: s, h2_plant: h2, tax_rate):
+    def __init__(self,project_lifetime: int, interest_rate: float, 
+                 capex: float, opex: float, inflation_rate: float, 
+                 solar_plant: s, h2_plant: h2, tax_rate, 
+                 tangible_capex: float, intangible_capex: float,
+                 capex_tangible_depreciation: int, capex_related_depreciation:int,
+                 related_capex_factor: float, opex_increase_rate:float):
         """
         Initializes an investment project.
         """
@@ -18,7 +23,7 @@ class project:
         self.project_lifetime = project_lifetime
         self.capex = capex
         self.opex = opex
-        self.opex_increase_rate=0.025 
+        self.opex_increase_rate=opex_increase_rate
         self.inflation_rate = inflation_rate
         self.solar_plant = solar_plant
         self.hydrogen_plant = h2_plant
@@ -32,12 +37,13 @@ class project:
         self.tangible_capex_depreciation_flows=None
         self.related_capex_depreciation_flows= None
         self.irr = None
+        self.breakeven_price_h2=None
         self.tax_rate = tax_rate
-        self.tangible_capex=0.2
-        self.intangible_capex=0.8
-        self.tangible_capex_depr_schedule =0.55 # depreciation periods as % of project lifetime
-        self.related_capex_factor=0.11
-        self.related_capex_depr_schedule=0.7
+        self.tangible_capex=tangible_capex
+        self.intangible_capex=intangible_capex
+        self.tangible_capex_depr_periods =capex_tangible_depreciation# depreciation periods as % of project lifetime
+        self.related_capex_factor=related_capex_factor/100
+        self.related_capex_depr_periods=capex_related_depreciation
 
 
     def calculate_npv(self):
@@ -49,16 +55,11 @@ class project:
         annual_revenue_flows=[]
         opex_flows= []
 
-        tangible_depreciation_periods= int(math.ceil(self.project_lifetime*self.tangible_capex_depr_schedule))
-        related_capex_depreciation_periods = int(math.ceil(self.project_lifetime*self.related_capex_depr_schedule))
-
-
-        tangible_capex_depreciation_flows = self.calculate_depreciation_schedule(self.capex*self.tangible_capex,tangible_depreciation_periods)
-        related_capex_depreciation_flows= self.calculate_depreciation_schedule(self.capex*self.related_capex_factor,related_capex_depreciation_periods)
+        tangible_capex_depreciation_flows = self.calculate_depreciation_schedule(self.capex*self.tangible_capex,self.tangible_capex_depr_periods)
+        related_capex_depreciation_flows= self.calculate_depreciation_schedule(self.capex*self.related_capex_factor,self.related_capex_depr_periods)
  
         # Calculate NPV
         for year in range(0, self.project_lifetime):
-
 
             production_decline_rate= pow(1-self.solar_plant.production_decline/100,year)
             annual_energy_output = self.solar_plant.annual_production_mwh*production_decline_rate
@@ -66,7 +67,7 @@ class project:
             annual_revenue = total_h2_production * self.hydrogen_plant.h2_price
 
             inflation_rate_increase= (1+self.inflation_rate/100)
-            opex_rate_increase=pow(1+self.opex_increase_rate,year)
+            opex_rate_increase=pow(1+self.opex_increase_rate/100,year)
             increased_opex = self.opex*opex_rate_increase*inflation_rate_increase
 
             taxable_income = annual_revenue - tangible_capex_depreciation_flows[year] - related_capex_depreciation_flows[year] - increased_opex
@@ -84,8 +85,6 @@ class project:
 
             annual_cash_flow=annual_cash_flow-income_tax
 
-
-            
             # Append to cash flow list
 
             cash_flows.append(round(annual_cash_flow, 2))
@@ -138,7 +137,7 @@ class project:
         return json.dumps(dict_with_indexes)
     
     def calculate_irr(self):
-        self.irr= npf.irr(self.cash_flows)*100
+        self.irr= round(npf.irr(self.cash_flows)*100,4)
         return json.dumps(self.irr)
     
     def get_irr(self):
@@ -180,46 +179,152 @@ class project:
         json_output = json.dumps(json_data, indent=4)
         return json_output
 
+    def calculate_break_even_price(self):
+        """
+        Adjusts the hydrogen_plant.h2_price to find the break-even price where the project's NPV is approximately 0.
+
+        Args:
+            project (object): The project object with attributes `npv`, `hydrogen_plant.h2_price`, and a method `calculate_npv()`.
+
+        Returns:
+            float: The break-even H2 price.
+        """
+        
+        test_project= copy.deepcopy(self)
+        
+        # Define the acceptable tolerance for NPV to be considered 0
+        tolerance = 1e-3
+
+        # Define the initial search bounds for H2 price
+        low_price = 0  # Lower bound (can be adjusted if negative prices are impossible)
+        high_price = test_project.hydrogen_plant.h2_price*10 # Current H2 price is the upper bound
+
+        while high_price - low_price > tolerance:
+            # Calculate the midpoint price
+            mid_price = (low_price + high_price) / 2
+
+            # Set the project's H2 price to the midpoint
+            test_project.hydrogen_plant.h2_price = mid_price
+
+            # Recalculate the project's NPV
+            test_project.calculate_npv()
+
+            # Check if the NPV is close enough to 0
+            if abs(test_project.npv) <= tolerance:
+                break  # Exit the loop since we've found the break-even price
+
+            # Adjust the bounds based on the NPV value
+            if test_project.npv > 0:
+                # If NPV is positive, decrease the H2 price
+                high_price = mid_price
+            else:
+                # If NPV is negative, increase the H2 price
+                low_price = mid_price
+
+        self.breakeven_price_h2=test_project.hydrogen_plant.h2_price
+        
+        return json.dumps(self.breakeven_price_h2)
 
 def get_sensitivity_analysis(reference_project : project):
 
-    keys = ["panel_efficiency","production_decline"]
+    solar_keys = ["panel_efficiency","production_decline"]
+    h2_keys =["electrolyzer_efficiency","h2_price"]
+    economic_keys = ["tax_rate","inflation_rate","interest_rate"]
+
     dict_shifted_npv = dict()
 
-    
+    reference_npv= reference_project.npv
 
-    for key in keys:
+    for key in economic_keys:
+
+
+        analysis_project_up = copy.deepcopy(reference_project)
+        analysis_project_down = copy.deepcopy(reference_project)
+
+        values=dict()
+
+        setattr(analysis_project_up,
+            key,
+            getattr(analysis_project_up,key)*1.1)
             
-            analysis_project_up = copy.deepcopy(reference_project)
-            analysis_project_down = copy.deepcopy(reference_project)
+        setattr(analysis_project_down,
+            key,
+            getattr(analysis_project_down,key)*0.9)
+
+        shifted_npv_up=analysis_project_up.calculate_npv().npv
+        shifted_npv_down=analysis_project_down.calculate_npv().npv
+
+        values["value_up"]=shifted_npv_up
+        values["value_down"]=shifted_npv_down
+
+        values["percentage_up"]=round(((shifted_npv_up-reference_npv)/abs(reference_npv))*100 ,4)
+        values["percentage_down"]=round(((shifted_npv_down-reference_npv)/abs(reference_npv))*100 ,4)
+        
+        dict_shifted_npv[key]=values  
+
+    for key in solar_keys:
             
-            values=dict()
-
-            setattr(analysis_project_up.solar_plant,
-                key,
-                getattr(analysis_project_up.solar_plant,key)*1.1)
+        analysis_project_up = copy.deepcopy(reference_project)
+        analysis_project_down = copy.deepcopy(reference_project)
             
-            setattr(analysis_project_down.solar_plant,
-                key,
-                getattr(analysis_project_down.solar_plant,key)*0.9)
-
-            match key: 
-                case "panel_efficiency":
-
-                    analysis_project_up.solar_plant.calculate_annual_production()
-                    analysis_project_up.solar_plant.calculate_capacity_factor()
-
-                    analysis_project_down.solar_plant.calculate_annual_production()
-                    analysis_project_down.solar_plant.calculate_capacity_factor()
-
-            shifted_npv_up=analysis_project_up.calculate_npv().npv
-            shifted_npv_down=analysis_project_down.calculate_npv().npv
-
-            values["up"]=shifted_npv_up
-            values["down"]=shifted_npv_down
-
-            dict_shifted_npv[key]=values     
+        values=dict()
 
 
-    return json.dumps(dict_shifted_npv)    
+        setattr(analysis_project_up.solar_plant,
+            key,
+            getattr(analysis_project_up.solar_plant,key)*1.1)
+        
+        setattr(analysis_project_down.solar_plant,
+            key,
+            getattr(analysis_project_down.solar_plant,key)*0.9)
+
+        match key: 
+            case "panel_efficiency":
+                analysis_project_up.solar_plant.calculate_annual_production()
+                analysis_project_up.solar_plant.calculate_capacity_factor()
+                analysis_project_down.solar_plant.calculate_annual_production()
+                analysis_project_down.solar_plant.calculate_capacity_factor()
+        
+        shifted_npv_up=analysis_project_up.calculate_npv().npv
+        shifted_npv_down=analysis_project_down.calculate_npv().npv
+
+        values["value_up"]=shifted_npv_up
+        values["value_down"]=shifted_npv_down
+        
+        values["percentage_up"]=round(((shifted_npv_up-reference_npv)/abs(reference_npv))*100 ,4)
+        values["percentage_down"]=round(((shifted_npv_down-reference_npv)/abs(reference_npv))*100 ,4)
+
+        dict_shifted_npv[key]=values  
+
+    for key in h2_keys:
+
+
+        analysis_project_up = copy.deepcopy(reference_project)
+        analysis_project_down = copy.deepcopy(reference_project)
+
+        values=dict()
+
+        setattr(analysis_project_up.hydrogen_plant,
+            key,
+            getattr(analysis_project_up.hydrogen_plant,key)*1.1)
+            
+        setattr(analysis_project_down.hydrogen_plant,
+            key,
+            getattr(analysis_project_down.hydrogen_plant,key)*0.9)
+
+        shifted_npv_up=analysis_project_up.calculate_npv().npv
+        shifted_npv_down=analysis_project_down.calculate_npv().npv
+        
+        values["value_up"]=shifted_npv_up
+        values["value_down"]=shifted_npv_down
+        
+        values["percentage_up"]=round(((shifted_npv_up-reference_npv)/abs(reference_npv))*100 ,4)
+        values["percentage_down"]=round(((shifted_npv_down-reference_npv)/abs(reference_npv))*100 ,4)
+
+        dict_shifted_npv[key]=values         
+
+
+    return json.dumps(dict_shifted_npv)
+
+
     

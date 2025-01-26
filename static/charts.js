@@ -341,6 +341,152 @@ function draw_depreciation_schedule(){
 }
 
 
+function draw_sensitivity_tornado_chart() {
+    // Fetch data from the endpoint
+    d3.json('/sensitivity-analysis')
+      .then(data => {
+        const keys = Object.keys(data);
+        const formattedData = keys.map(key => ({
+          key,
+          up: data[key].percentage_up,
+          down: data[key].percentage_down,
+          range: Math.abs(data[key].percentage_up - data[key].percentage_down),
+        }))
+        .sort((a, b) => b.range - a.range); // Sort by range in descending order
+  
+        // Chart dimensions
+        const margin = { top: 20, right: 30, bottom: 50, left: 150 }; // Increased left margin to avoid bars touching the axis
+        const width = 800 - margin.left - margin.right;
+        const height = keys.length * 55;
+  
+        // Create SVG container
+        const svg = d3.select("#tornado_chart")
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left},${margin.top})`);
+  
+        // Tooltip setup
+        const tooltip = d3.select("body")
+          .append("div")
+          .style("position", "absolute")
+          .style("padding", "8px")
+          .style("background", "rgba(0, 0, 0, 0.8)")
+          .style("color", "white")
+          .style("border-radius", "4px")
+          .style("pointer-events", "none")
+          .style("opacity", 0);
+  
+        // Find max absolute value for symmetric domain
+        const maxValue = d3.max(formattedData, d => Math.max(Math.abs(d.up), Math.abs(d.down)));
+  
+        // Scales
+        const x = d3.scaleLinear()
+          .domain([-maxValue - 0.1*maxValue, maxValue + 0.1]) // Symmetric domain
+          .range([0, width]);
+  
+        const y = d3.scaleBand()
+          .domain(formattedData.map(d => d.key))
+          .range([0, height])
+          .padding(0.4);
+  
+        // Axes
+        svg.append("g")
+          .call(d3.axisLeft(y).tickSize(0))
+          .selectAll("text")
+          .style("font-size", "12px");
+  
+        svg.append("g")
+          .attr("transform", `translate(0, ${height})`)
+          .call(d3.axisBottom(x).ticks(6))
+          .selectAll("text")
+          .style("font-size", "12px");
+  
+        // Draw bars
+        svg.selectAll(".bar-group")
+          .data(formattedData)
+          .join("g")
+          .attr("class", "bar-group")
+          .each(function (d) {
+            const group = d3.select(this);
+            
+
+
+            // Draw "down" bar
+            group.append("rect")
+              .attr("class", "bar-down")
+              .attr("x", d.down < 0 ? x(d.down) : x(0)) // Start from `d.down` if negative
+              .attr("y", y(d.key))
+              .attr("width", Math.abs(x(d.down) - x(0))) // Width based on distance from 0
+              .attr("height", y.bandwidth() / 2)
+              .on("mouseover", (event) => {
+                tooltip.transition().duration(200).style("opacity", 1);
+                tooltip.html(`Parameter: ${d.key}<br>-10%: ${d.down.toFixed(2)}%`)
+                  .style("left", `${event.pageX + 10}px`)
+                  .style("top", `${event.pageY - 20}px`);
+              })
+              .on("mousemove", (event) => {
+                tooltip.style("left", `${event.pageX + 10}px`)
+                  .style("top", `${event.pageY - 20}px`);
+              })
+              .on("mouseout", () => {
+                tooltip.transition().duration(200).style("opacity", 0);
+              });
+  
+            // Draw "up" bar
+            group.append("rect")
+              .attr("class", "bar-up")
+              .attr("x", d.up < 0 ? x(d.up) : x(0)) // Start from `d.up` if negative
+              .attr("y", y(d.key) + y.bandwidth() / 2)
+              .attr("width", Math.abs(x(d.up) - x(0))) // Width based on distance from 0
+              .attr("height", y.bandwidth() / 2)
+              .on("mouseover", (event) => {
+                tooltip.transition().duration(200).style("opacity", 1);
+                tooltip.html(`Parameter: ${d.key}<br>+10%: ${d.up.toFixed(2)}%`)
+                  .style("left", `${event.pageX + 10}px`)
+                  .style("top", `${event.pageY - 20}px`);
+              })
+              .on("mousemove", (event) => {
+                tooltip.style("left", `${event.pageX + 10}px`)
+                  .style("top", `${event.pageY - 20}px`);
+              })
+              .on("mouseout", () => {
+                tooltip.transition().duration(200).style("opacity", 0);
+              });
+          });
+
+          // Add labels
+          svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", height + margin.bottom-3)
+          .attr("text-anchor", "middle")
+          .text("% change in NPV ");
+
+      svg.append("text")
+          .attr("x", -height / 2)
+          .attr("y", -margin.left + 15)
+          .attr("transform", "rotate(-90)")
+          .attr("text-anchor", "middle")
+          .text("Parameters");
+  
+      })
+      .catch(error => {
+        console.error("Error fetching or processing data:", error);
+      });
+  }
+
+  
+  function updateSliderValues() {
+    const slider = document.getElementById('slider_input');
+    const valueX = document.getElementById('tangible_capex');
+    const value1MinusX = document.getElementById('intangible_capex');
+    const x = parseFloat(slider.value).toFixed(2);
+    valueX.textContent = `${x}%`; // Add the % sign
+    value1MinusX.textContent = `${(1 - x).toFixed(2)}%`; // Add the % sign
+}
+
+
 function formatNumber(value) {
     if (typeof value !== "number") return value; // Skip formatting for non-numeric values
     return value.toFixed(1).replace(/\d(?=(\d{3})+\.)/g, '$&,'); // Round to 1 decimal and add thousand separators
