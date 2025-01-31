@@ -213,3 +213,11 @@ img {
 }
 
 
+
+#summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the h2 element */
+    text-align: center;
+}
+

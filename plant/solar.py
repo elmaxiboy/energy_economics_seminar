@@ -33,7 +33,7 @@ class solar:
         stc_capacity_per_m2=1 
 
         #Required m2 for actual capacity
-        m2_per_mw = (self.installed_cap*1000)/(stc_capacity_per_m2*(self.panel_efficiency/100))
+        m2_per_mw = (self.installed_cap*1000)/(stc_capacity_per_m2)
         
         data_dict = json.loads(self.avg_monthly_ghi)
         for month,ghi in data_dict.items():

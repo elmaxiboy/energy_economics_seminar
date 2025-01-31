@@ -15,7 +15,8 @@ class project:
                  solar_plant: s, h2_plant: h2, tax_rate, 
                  tangible_capex: float, intangible_capex: float,
                  capex_tangible_depreciation: int, capex_related_depreciation:int,
-                 related_capex_factor: float, opex_increase_rate:float):
+                 related_capex_factor: float, opex_increase_rate:float,
+                 carbon_credit_price:float):
         """
         Initializes an investment project.
         """
@@ -38,12 +39,18 @@ class project:
         self.related_capex_depreciation_flows= None
         self.irr = None
         self.breakeven_price_h2=None
+        self.breakeven_price_carbon_credit=None
         self.tax_rate = tax_rate
         self.tangible_capex=tangible_capex
         self.intangible_capex=intangible_capex
         self.tangible_capex_depr_periods =capex_tangible_depreciation# depreciation periods as % of project lifetime
         self.related_capex_factor=related_capex_factor/100
         self.related_capex_depr_periods=capex_related_depreciation
+        self.tons_co2_equivalent_flows=None
+        self.h2_output_flows=None
+        self.emmissions_improvement_rate= None
+        self.annual_energy_output_flows=None
+        self.carbon_credit_price=carbon_credit_price
 
 
     def calculate_npv(self):
@@ -54,6 +61,9 @@ class project:
         income_tax_flows= []
         annual_revenue_flows=[]
         opex_flows= []
+        avoided_emmisions_flows=[]
+        h2_output_flows=[]
+        annual_energy_output_flows=[]
 
         tangible_capex_depreciation_flows = self.calculate_depreciation_schedule(self.capex*self.tangible_capex,self.tangible_capex_depr_periods)
         related_capex_depreciation_flows= self.calculate_depreciation_schedule(self.capex*self.related_capex_factor,self.related_capex_depr_periods)
@@ -64,7 +74,8 @@ class project:
             production_decline_rate= pow(1-self.solar_plant.production_decline/100,year)
             annual_energy_output = self.solar_plant.annual_production_mwh*production_decline_rate
             total_h2_production = self.hydrogen_plant.calculate_hydrogen_from_energy(annual_energy_output) # Annual H2 production in kg
-            annual_revenue = total_h2_production * self.hydrogen_plant.h2_price
+            avoided_tons_co2= self.hydrogen_plant.avoided_co2_emmissions_tons(total_h2_production)
+            annual_revenue = total_h2_production * self.hydrogen_plant.h2_price + avoided_tons_co2*self.carbon_credit_price
 
             inflation_rate_increase= (1+self.inflation_rate/100)
             opex_rate_increase=pow(1+self.opex_increase_rate/100,year)
@@ -102,6 +113,11 @@ class project:
             annual_revenue_flows.append(annual_revenue)
             income_tax_flows.append(income_tax)
             opex_flows.append(increased_opex)
+            avoided_emmisions_flows.append(avoided_tons_co2)
+            h2_output_flows.append(round(total_h2_production/1000,2)) #tons of h2
+            annual_energy_output_flows.append(round(annual_energy_output,2))
+
+                                           
     
         self.npv = sum(discounted_cash_flows)
         self.opex_flows=opex_flows
@@ -112,7 +128,9 @@ class project:
         self.income_tax_flows=income_tax_flows
         self.tangible_capex_depreciation_flows= tangible_capex_depreciation_flows
         self.related_capex_depreciation_flows = related_capex_depreciation_flows
-        
+        self.tons_co2_equivalent_flows=avoided_emmisions_flows
+        self.h2_output_flows=h2_output_flows
+        self.annual_energy_output_flows =annual_energy_output_flows
         return self
     
     def calculate_depreciation_schedule(self,capex_subject_to_depreciation, depreciation_periods):
@@ -178,8 +196,25 @@ class project:
 
         json_output = json.dumps(json_data, indent=4)
         return json_output
+    
+    def get_outputs(self):
+    
+        keys = ["year","mwh_solar_output","tons_h2_output","tons_co2_equivalent"]
+        years=[]
+        
+        for i in range(0, self.project_lifetime+1):
+            years.append(i)
 
-    def calculate_break_even_price(self):
+        json_data = [dict(zip(keys, values)) for values in zip(years,
+                                                               self.annual_energy_output_flows,
+                                                               self.h2_output_flows,
+                                                               self.tons_co2_equivalent_flows
+                                                               )]
+
+        json_output = json.dumps(json_data, indent=4)
+        return json_output
+
+    def calculate_h2_break_even_price(self):
         """
         Adjusts the hydrogen_plant.h2_price to find the break-even price where the project's NPV is approximately 0.
 
@@ -224,12 +259,59 @@ class project:
         self.breakeven_price_h2=test_project.hydrogen_plant.h2_price
         
         return json.dumps(self.breakeven_price_h2)
+    
+
+    def calculate_carbon_credit_break_even_price(self):
+        """
+        Adjusts the price to find the break-even price where the project's NPV is approximately 0.
+
+        Args:
+            project (object): The project object with attributes `npv`, `hydrogen_plant.price`, and a method `calculate_npv()`.
+
+        Returns:
+            float: The break-even price.
+        """
+        
+        test_project= copy.deepcopy(self)
+        
+        # Define the acceptable tolerance for NPV to be considered 0
+        tolerance = 1e-3
+
+        # Define the initial search bounds for H2 price
+        low_price = 0  # Lower bound (can be adjusted if negative prices are impossible)
+        high_price = test_project.carbon_credit_price*10 # x10 Current price is the upper bound
+
+        while high_price - low_price > tolerance:
+            # Calculate the midpoint price
+            mid_price = (low_price + high_price) / 2
+
+            # Set the project's H2 price to the midpoint
+            test_project.carbon_credit_price = mid_price
+
+            # Recalculate the project's NPV
+            test_project.calculate_npv()
+
+            # Check if the NPV is close enough to 0
+            if abs(test_project.npv) <= tolerance:
+                break  # Exit the loop since we've found the break-even price
+
+            # Adjust the bounds based on the NPV value
+            if test_project.npv > 0:
+                # If NPV is positive, decrease the H2 price
+                high_price = mid_price
+            else:
+                # If NPV is negative, increase the H2 price
+                low_price = mid_price
+
+        self.breakeven_price_carbon_credit=test_project.carbon_credit_price
+        
+        return json.dumps(self.breakeven_price_carbon_credit)    
 
 def get_sensitivity_analysis(reference_project : project):
 
     solar_keys = ["panel_efficiency","production_decline"]
     h2_keys =["electrolyzer_efficiency","h2_price"]
-    economic_keys = ["tax_rate","inflation_rate","interest_rate"]
+    economic_keys = ["capex","tax_rate","inflation_rate","interest_rate","carbon_credit_price"]
 
     dict_shifted_npv = dict()
 

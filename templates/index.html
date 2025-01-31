@@ -94,6 +94,13 @@
                     
                     <label for="h2_price">H2 Price (USD/kg):</label>
                     <input type="number" step="0.0000000000000001" id="h2_price" name="h2_price" value="{{ inputs.h2_price }}" placeholder="H2 Price (USD/kg)" required>
+                
+                    <label for="co2_equivalence">CO2 Equivalence (kgCO2eq/kgH2):</label>
+                    <input type="number" step="0.001" id="co2_equivalence" name="co2_equivalence" value="{{ inputs.co2_equivalence}}" placeholder="Carbon equivalence per kg of green H2" required>
+                    
+                    <label for="carbon_credit_price">Carbon Credit price (USD/tCO2eq):</label>
+                    <input type="number" step="0.0000000001" id="carbon_credit_price" name="carbon_credit_price" value="{{ inputs.carbon_credit_price}}" placeholder="Carbon credit price per tonne of CO2eq" required>
+
                 </div>
                 <div class="menu_child" id="map">
                         <script src="{{ url_for('static', filename='map.js') }}"></script>
@@ -112,18 +119,34 @@
 
 
     {% if npv is not none %}
+    <h2>Results</h2>
+    
     <div class="results">
+        <div id="summary">
+            
+            <p><strong>Energy Output:</strong> <br> {{ energy_output | format_number }} MWh</p>
+            <p><strong>Capacity Factor:</strong> <br>{{ cap_factor | format_number }} </p>
+            <p><strong>H2 Production:</strong> <br> {{ total_h2_production | format_number }} tonnes</p>
+            
+        </div> 
 
         <div id="summary">
-            <h2>Summary</h2>
-            <p><strong>Produced Energy:</strong> <br> {{ energy_output | format_number }} MWh/year</p>
-            <p><strong>Estimated Cap. Factor:</strong> <br>{{ cap_factor | format_number }} </p>
-            <p><strong>Total H2 Production:</strong> <br> {{ total_h2_production | format_number }} kg/year</p>
             <p><strong>NPV:</strong> <br>{{ npv | format_number }} USD</p>
             <p><strong>IRR:</strong> <br>{{ irr }} %</p>
-            <p><strong>H2 breakeven price:</strong> <br>{{ breakeven_price_h2}} USD/kg</p>
-
         </div>
+
+
+        <div id="summary">
+            
+            <p><strong>H2 breakeven:</strong> <br>{{ breakeven_price_h2}} USD/kg</p>
+            <p><strong>Carbon credit breakeven:</strong> <br>{{ breakeven_price_carbon_credit}} USD/tCO2eq</p>
+            <p><strong>Emmisions avoided:</strong> <br>{{avoided_co2_equivalents_tons| format_number}} tCO2eq</p>
+        </div>    
+            
+        
+    </div>
+
+    <div class="results">    
 
         <div id="ghi">
             <h2>Average Daily Global Horizontal Irradiance</h2>
@@ -164,7 +187,15 @@
             <script>draw_depreciation_schedule()</script>
         </div>
 
+        <div id="outputs">
+            <h2>Energy Outputs</h2>
+            <script src="{{ url_for('static', filename='charts.js') }}"></script>
+            <table id="data-table-outputs"></table>
+            <script>draw_outputs()</script>
+        </div>
+
     </div>
+
 
 
 

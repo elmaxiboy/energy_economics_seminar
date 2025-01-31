@@ -286,6 +286,62 @@ function draw_cash_flows(){
 }
 
 
+
+
+function draw_outputs(){
+
+    // Fetch JSON data
+    d3.json("/outputs")
+        .then(data => {
+            createTable(data);
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+        });
+
+    function createTable(data) {
+        const table = d3.select("#data-table-outputs");
+
+        // Extract column names from the JSON
+        const columns = Object.keys(data[0]);
+
+        // Add table header
+        const thead = table.append("thead").append("tr");
+        thead.selectAll("th")
+            .data(columns)
+            .enter()
+            .append("th")
+            .text(d => d);
+
+        // Add table body
+        const tbody = table.append("tbody");
+        const rows = tbody.selectAll("tr")
+            .data(data)
+            .enter()
+            .append("tr");
+
+        rows.selectAll("td")
+            .data(row => columns.map(col => ({ key: col, value: row[col] })))
+            .enter()
+            .append("td")
+            .text(d => formatNumber(d.value))
+
+
+        // Add table footer for totals
+        const tfoot = table.append("tfoot").append("tr");
+        tfoot.selectAll("td")
+            .data(columns)
+            .enter()
+            .append("td")
+            .text((col, i) => {
+                if (i === 0) return "Total"; // First column (year) shows "Total"
+                const total = data.reduce((sum, row) => sum + (row[col] || 0), 0);
+                return col !== "year" ? formatNumber(total) : ""; // Skip totals for "year"
+            })
+            .style("font-weight", "bold"); // Make the total row bold
+    }
+}
+
 function draw_depreciation_schedule(){
 
     // Fetch JSON data
@@ -356,7 +412,7 @@ function draw_sensitivity_tornado_chart() {
   
         // Chart dimensions
         const margin = { top: 20, right: 30, bottom: 50, left: 150 }; // Increased left margin to avoid bars touching the axis
-        const width = 800 - margin.left - margin.right;
+        const width = svg_W - margin.left - margin.right;
         const height = keys.length * 55;
   
         // Create SVG container
@@ -367,16 +423,6 @@ function draw_sensitivity_tornado_chart() {
           .append("g")
           .attr("transform", `translate(${margin.left},${margin.top})`);
   
-        // Tooltip setup
-        const tooltip = d3.select("body")
-          .append("div")
-          .style("position", "absolute")
-          .style("padding", "8px")
-          .style("background", "rgba(0, 0, 0, 0.8)")
-          .style("color", "white")
-          .style("border-radius", "4px")
-          .style("pointer-events", "none")
-          .style("opacity", 0);
   
         // Find max absolute value for symmetric domain
         const maxValue = d3.max(formattedData, d => Math.max(Math.abs(d.up), Math.abs(d.down)));
@@ -411,7 +457,7 @@ function draw_sensitivity_tornado_chart() {
           .each(function (d) {
             const group = d3.select(this);
             
-
+        const tooltip = d3.select(".tooltip");
 
             // Draw "down" bar
             group.append("rect")

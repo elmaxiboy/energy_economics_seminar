@@ -26,7 +26,9 @@ default_values = {
         "depr_periods_tangible_capex":10,
         "depr_periods_related_capex":15,
         "related_capex_factor":11,
-        "opex_increase_rate":0.025
+        "opex_increase_rate":0.025,
+        "co2_equivalence": 22.87,
+        "carbon_credit_price":5
     }
 
 def calculate_hydrogen_from_energy(mwh, efficiency):

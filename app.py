@@ -36,11 +36,12 @@ def index():
         capex_related_depreciation = int(request.form["depr_periods_related_capex"])
         related_capex_factor = float(request.form["related_capex_factor"])
         opex_increase_rate = float(request.form["opex_increase_rate"])
-        
+        co2_equivalence = float(request.form["co2_equivalence"])
+        carbon_credit_price = float(request.form["carbon_credit_price"])
         
 
         solar_plant = s.solar(installed_cap,latitude,longitude,panel_efficiency, production_decline)
-        h2_plant=h2.hydrogen(electrolyzers_efficiency,h2_price)
+        h2_plant=h2.hydrogen(electrolyzers_efficiency,h2_price,co2_equivalence)
 
         global p # investment project
  
@@ -48,7 +49,8 @@ def index():
                           inflation_rate,solar_plant,h2_plant,tax_rate,
                           tangible_capex, intangible_capex,
                           capex_tangible_depreciation,capex_related_depreciation,
-                          related_capex_factor,opex_increase_rate)
+                          related_capex_factor,opex_increase_rate,
+                          carbon_credit_price)
 
         p.solar_plant.calculate_avg_monthly_ghi()
         energy_output=p.solar_plant.calculate_annual_production()
@@ -56,7 +58,8 @@ def index():
         
         p.calculate_npv()
         p.calculate_irr()
-        p.calculate_break_even_price()
+        p.calculate_h2_break_even_price()
+        p.calculate_carbon_credit_break_even_price()
         
         # Pass the zipped data to the template
         cash_flow_table = list(zip(range(0, project_lifetime + 1), p.cash_flows, p.discounted_cash_flows,p.cum_npv_flows))
@@ -68,8 +71,8 @@ def index():
         return render_template(
             "index.html",
             npv=p.npv,
-            total_h2_production=p.hydrogen_plant.h2_output,
-            energy_output=energy_output,
+            total_h2_production=round(sum(p.h2_output_flows,2)),
+            energy_output=round(sum(p.annual_energy_output_flows,2)),
             annual_revenue=p.annual_revenue_flows,
             cash_flow_table=cash_flow_table,
             total_cash_flow=round(total_cash_flow, 2),
@@ -77,7 +80,9 @@ def index():
             total_cum_npv=round(total_cum_npv, 2),
             cap_factor=round(cap_factor,2),
             irr= p.irr,
+            avoided_co2_equivalents_tons= round(sum(p.tons_co2_equivalent_flows),2),
             breakeven_price_h2=round(p.breakeven_price_h2,2),
+            breakeven_price_carbon_credit=round(p.breakeven_price_carbon_credit,2),
             land_required= p.solar_plant.land_required,
             tangible_capex=tangible_capex,
             intangible_capex=intangible_capex,
@@ -111,6 +116,11 @@ def depreciation_schedule():
     cash_flows=p.get_depreciation_schedule()
     return cash_flows
 
+@app.route("/outputs", methods=["GET", "POST"])
+def outputs():  
+    avoided_co2_equivalent=p.get_outputs()
+    return avoided_co2_equivalent
+
 
 @app.route("/sensitivity-analysis", methods=["GET", "POST"])
 def sensitivity_analysis():  
@@ -119,7 +129,12 @@ def sensitivity_analysis():
 
 @app.route("/breakeven-h2-price", methods=["GET", "POST"])
 def breakeven_price_h2():  
-    breakeven_price=p.calculate_break_even_price()
+    breakeven_price=p.calculate_h2_break_even_price()
+    return breakeven_price
+
+@app.route("/breakeven-carbon-credit-price", methods=["GET", "POST"])
+def breakeven_price_carbon_credit():  
+    breakeven_price=p.calculate_carbon_credit_break_even_price()
     return breakeven_price
 
 @app.template_filter("format_number")
