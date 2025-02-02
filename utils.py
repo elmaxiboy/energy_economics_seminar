@@ -7,12 +7,12 @@ from matplotlib.ticker import FuncFormatter
 
 default_values = {
         "project_lifetime": 20,
-        "discount_rate": 8,
-        "capex": 300000000,
-        "opex": 30000000,
+        "discount_rate": 6,
+        "capex": 300000000+150000000,
+        "opex": 13800000+9000000,
         "tax_rate":22.5,
-        "electrolyzers_efficiency": 55,
-        "h2_price": 5.5,
+        "electrolyzers_efficiency": 65, #mid efficieny alkaline electrolyzers
+        "h2_price": 8.4,
         "cap_factor":14.7,
         "installed_cap":300,
         "latitude":39.338160,
@@ -23,12 +23,12 @@ default_values = {
         "tangible_capex":0.2,
         "intangible_capex":0.8,
         "slider_input":0.2,
-        "depr_periods_tangible_capex":10,
+        "depr_periods_tangible_capex":20,
         "depr_periods_related_capex":15,
-        "related_capex_factor":11,
+        "related_capex_factor":10,
         "opex_increase_rate":0.025,
         "co2_equivalence": 22.87,
-        "carbon_credit_price":5
+        "carbon_credit_price":7.5
     }
 
 def calculate_hydrogen_from_energy(mwh, efficiency):
