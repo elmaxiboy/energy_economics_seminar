@@ -9,26 +9,26 @@ default_values = {
         "project_lifetime": 20,
         "discount_rate": 6,
         "capex": 300000000+150000000,
-        "opex": 13800000+9000000,
+        "opex": 13800000+9000000, 
         "tax_rate":22.5,
         "electrolyzers_efficiency": 65, #mid efficieny alkaline electrolyzers
         "h2_price": 8.4,
         "cap_factor":14.7,
         "installed_cap":300,
-        "latitude":39.338160,
-        "longitude":87.511127,
+        "latitude":41.723,
+        "longitude":83.042,
         "panel_efficiency": 22,
         "inflation_rate": 2.75,
         "prod_decline":0.5,
-        "tangible_capex":0.2,
-        "intangible_capex":0.8,
-        "slider_input":0.2,
+        "tangible_capex":0.8,
+        "intangible_capex":0.2,
+        "slider_input":0.8,
         "depr_periods_tangible_capex":20,
         "depr_periods_related_capex":15,
         "related_capex_factor":10,
         "opex_increase_rate":0.025,
         "co2_equivalence": 22.87,
-        "carbon_credit_price":7.5
+        "carbon_credit_price":15
     }
 
 def calculate_hydrogen_from_energy(mwh, efficiency):

@@ -49,8 +49,8 @@
 
                     <label for="related_capex_factor">Tangible vs Intangible CAPEX Ratio:</label>
                     <input type="range" id="slider_input" name="slider_input" min="0" max="1" step="0.01" value="{{ inputs.slider_input }}" oninput="updateSliderValues()">
-                    <p>Tangible ratio : <span id="tangible_capex">{{ tangible_capex }}%</span></p>
-                    <p>Intangible ratio: <span id="intangible_capex">{{ intangible_capex }}%</span></p>
+                    <p>Tangible ratio : <span id="tangible_capex">{{ tangible_capex }}</span></p>
+                    <p>Intangible ratio: <span id="intangible_capex">{{ intangible_capex }}</span></p>
                      
                     <label for="related_capex_factor">Related Capex (%):</label>
                     <input type="number" step="0.1"  min="0"  id="related_capex_factor" name="related_capex_factor" value="{{ inputs.related_capex_factor }}" placeholder="Related Capex factor" required>

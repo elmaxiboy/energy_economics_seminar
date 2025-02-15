@@ -73,6 +73,7 @@ class project:
 
             production_decline_rate= pow(1-self.solar_plant.production_decline/100,year)
             annual_energy_output = self.solar_plant.annual_production_mwh*production_decline_rate
+            #TODO: UPPER BOUND TO TONS OF H2 PRODUCED
             total_h2_production = self.hydrogen_plant.calculate_hydrogen_from_energy(annual_energy_output) # Annual H2 production in kg
             avoided_tons_co2= self.hydrogen_plant.avoided_co2_emmissions_tons(total_h2_production)
             annual_revenue = total_h2_production * self.hydrogen_plant.h2_price + avoided_tons_co2*self.carbon_credit_price
@@ -85,7 +86,7 @@ class project:
             annual_cash_flow = annual_revenue - increased_opex
 
             if year == 0:
-                taxable_income= taxable_income - self.intangible_capex*self.capex
+                taxable_income= taxable_income #- self.intangible_capex*self.capex
                 annual_cash_flow= annual_cash_flow - (self.capex+self.capex*self.related_capex_factor)
 
 
@@ -278,7 +279,7 @@ class project:
         tolerance = 1e-3
 
         # Define the initial search bounds for H2 price
-        low_price = 0  # Lower bound (can be adjusted if negative prices are impossible)
+        low_price = -test_project.carbon_credit_price*10  # Lower bound (can be adjusted if negative prices are impossible)
         high_price = test_project.carbon_credit_price*10 # x10 Current price is the upper bound
 
         while high_price - low_price > tolerance:
@@ -311,7 +312,7 @@ def get_sensitivity_analysis(reference_project : project):
 
     solar_keys = ["panel_efficiency","production_decline"]
     h2_keys =["electrolyzer_efficiency","h2_price"]
-    economic_keys = ["capex","tax_rate","inflation_rate","interest_rate","carbon_credit_price"]
+    economic_keys = ["opex","capex","tax_rate","inflation_rate","interest_rate","carbon_credit_price"]
 
     dict_shifted_npv = dict()
 
