@@ -1,15 +1,8 @@
-FROM python:3.12-slim-bookworm AS base
+FROM python:3.13-alpine
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    gcc \
-    g++ \
-    python3-dev \
-    meson \
-    && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt .
 RUN pip install --upgrade pip setuptools wheel
 RUN  pip install --no-cache-dir -r requirements.txt
 COPY . .
-ENTRYPOINT [ "python","app.py" ]
+ENTRYPOINT [ "gunicorn", "-w", "3", "-b", "0.0.0.0:5000", "app:app"] 
 

@@ -1,0 +1,12 @@
+services:
+  npv_calculator:
+      image: npv_calculator:latest
+      container_name: npv_calculator
+      ports:
+        - 5000:5000 #"[host:]container[/protocol]"
+      restart: unless-stopped
+      networks:
+      - energy
+networks:
+  energy:
+      name: "energy"
