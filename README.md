@@ -44,3 +44,10 @@ Inside a web browser navigate to http://127.0.0.1:5000. The default values will 
 ## Contact
 
 Feel free to collaborate. If you have any questions you can contact me via email: maxescovi@gmail.com
+
+## TODO...
+
+- handle multiple sessions
+- cache for same location 
+- save results to database
+- 
