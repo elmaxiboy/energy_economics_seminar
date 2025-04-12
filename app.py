@@ -92,47 +92,47 @@ def index():
     #rest of allowed methods
     return render_template("index.html", inputs=utils.default_values)
 
-@app.route("/avg-monthly-ghi-graph", methods=["GET", "POST"])
+@app.route("/avg-monthly-ghi-graph", methods=["GET"])
 def avg_monthly_ghi_graph():  
     return p.solar_plant.avg_monthly_ghi
 
-@app.route("/npv-graph", methods=["GET", "POST"])
+@app.route("/npv-graph", methods=["GET"])
 def npv_graph():  
     json_cum_npv=p.cum_npv_to_json()
     return json_cum_npv
 
-@app.route("/irr", methods=["GET", "POST"])
+@app.route("/irr", methods=["GET"])
 def irr():  
     irr=p.get_irr()
     return irr
 
-@app.route("/cash-flows", methods=["GET", "POST"])
+@app.route("/cash-flows", methods=["GET"])
 def cash_flows():  
     cash_flows=p.get_cash_flows()
     return cash_flows
 
-@app.route("/depreciation-schedule", methods=["GET", "POST"])
+@app.route("/depreciation-schedule", methods=["GET"])
 def depreciation_schedule():  
     cash_flows=p.get_depreciation_schedule()
     return cash_flows
 
-@app.route("/outputs", methods=["GET", "POST"])
+@app.route("/outputs", methods=["GET"])
 def outputs():  
     avoided_co2_equivalent=p.get_outputs()
     return avoided_co2_equivalent
 
 
-@app.route("/sensitivity-analysis", methods=["GET", "POST"])
+@app.route("/sensitivity-analysis", methods=["GET"])
 def sensitivity_analysis():  
     sensitivity_analysis=project.get_sensitivity_analysis(p)
     return sensitivity_analysis
 
-@app.route("/breakeven-h2-price", methods=["GET", "POST"])
+@app.route("/breakeven-h2-price", methods=["GET"])
 def breakeven_price_h2():  
     breakeven_price=p.calculate_h2_break_even_price()
     return breakeven_price
 
-@app.route("/breakeven-carbon-credit-price", methods=["GET", "POST"])
+@app.route("/breakeven-carbon-credit-price", methods=["GET"])
 def breakeven_price_carbon_credit():  
     breakeven_price=p.calculate_carbon_credit_break_even_price()
     return breakeven_price
