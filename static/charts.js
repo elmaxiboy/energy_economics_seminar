@@ -1,9 +1,9 @@
 const svg_W = 600
 const svg_H = 300
  
- function draw_ghi(){
+ function draw_ghi(uuid){
     // Load the JSON data
-    d3.json('/avg-monthly-ghi-graph').then(data => {
+    d3.json(`/avg-monthly-ghi-graph/${uuid}`).then(data => {
         const formattedData = Object.entries(data).map(([month, radiation]) => ({
             month: +month, // Convert month to integer
             radiation: +radiation // Convert radiation to number
@@ -100,9 +100,9 @@ const svg_H = 300
     });
 }
 
-function draw_npv() {
+function draw_npv(uuid) {
     // Fetch data from the endpoint
-    d3.json('/npv-graph')
+    d3.json(`/npv-graph/${uuid}`)
         .then(data => {
             // Validate and transform data into a consistent format
             const formatter = new Intl.NumberFormat('en-US');
@@ -222,10 +222,10 @@ function draw_npv() {
         });
 }
 
-function draw_cash_flows(){
+function draw_cash_flows(uuid){
 
     // Fetch JSON data
-    d3.json("/cash-flows")
+    d3.json(`/cash-flows/${uuid}`)
         .then(data => {
             createTable(data);
         })
@@ -288,10 +288,10 @@ function draw_cash_flows(){
 
 
 
-function draw_outputs(){
+function draw_outputs(uuid){
 
     // Fetch JSON data
-    d3.json("/outputs")
+    d3.json(`/outputs/${uuid}`)
         .then(data => {
             createTable(data);
         })
@@ -342,10 +342,10 @@ function draw_outputs(){
     }
 }
 
-function draw_depreciation_schedule(){
+function draw_depreciation_schedule(uuid){
 
     // Fetch JSON data
-    d3.json("/depreciation-schedule")
+    d3.json(`/depreciation-schedule/${uuid}`)
         .then(data => {
             createTable(data);
         })
@@ -397,9 +397,9 @@ function draw_depreciation_schedule(){
 }
 
 
-function draw_sensitivity_tornado_chart() {
+function draw_sensitivity_tornado_chart(uuid) {
     // Fetch data from the endpoint
-    d3.json('/sensitivity-analysis')
+    d3.json(`/sensitivity-analysis/${uuid}`)
       .then(data => {
         const keys = Object.keys(data);
         const formattedData = keys.map(key => ({

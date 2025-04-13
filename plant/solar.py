@@ -78,6 +78,33 @@ class solar:
         theoretical_annual_production= self.installed_cap*365*24
         self.cap_factor=self.annual_production_mwh/theoretical_annual_production
         return self.cap_factor
+    
+    def to_dict(self):
+        def serialize_flow(flow):
+            if flow is None:
+                return None
+            elif hasattr(flow, "tolist"):
+                return flow.tolist()  # for NumPy arrays or Pandas Series
+            elif isinstance(flow, (list, dict)):
+                return flow
+            else:
+                return str(flow)  # fallback for anything weird
+    
+        return {
+            
+                "installed_cap":self.installed_cap,
+                "cap_factor" :self.cap_factor,
+                "latitude":self.latitude ,
+                "longitude" :self.longitude,
+                "annual_production_":self.annual_production_mwh,
+                "avg_monthly_ghi":self.avg_monthly_ghi,
+                "panel_efficiency":self.panel_efficiency,
+                "production_decline":self.production_decline,
+                "land_required":self.land_required,
+                "last_latitude" :self.last_latitude,
+                "last_longitude" :self.last_longitude
+        
+    }
 
     
     def __str__(self):

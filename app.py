@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import json
+import uuid
 from flask import Flask, render_template, request, send_file, url_for, session
 import utils
 from plant import solar as s
 from plant import hydrogen as h2
 from investment import project
+import redis
 
 app = Flask(__name__)
 app.secret_key = "seminar"  # Required for Flask-WTF forms
-
+r = redis.Redis(host='localhost', port=6379, db=0)
 
 # NPV Calculation Function
 @app.route("/", methods=["GET", "POST"])
@@ -50,7 +53,11 @@ def index():
                           capex_tangible_depreciation,capex_related_depreciation,
                           related_capex_factor,opex_increase_rate,
                           carbon_credit_price)
+        
+        obj_id = str(uuid.uuid4())
+        p_dict=p.to_dict()
 
+        r.setex(obj_id, 300, json.dumps(p_dict)) 
         
         return render_template(
             "index.html",
@@ -70,53 +77,70 @@ def index():
             tangible_capex=tangible_capex,
             intangible_capex=intangible_capex,
             slider_input=tangible_capex,
-            inputs=request.form
+            inputs=request.form,
+            uuid=obj_id
         )
     #rest of allowed methods
     return render_template("index.html", inputs=utils.default_values)
 
-@app.route("/avg-monthly-ghi-graph", methods=["GET"])
-def avg_monthly_ghi_graph():  
-    return p.solar_plant.avg_monthly_ghi
+@app.route("/avg-monthly-ghi-graph/<uuid>", methods=["GET"])
+def avg_monthly_ghi_graph(uuid):
+    value = r.get(uuid)
+    json_value = json.loads(value.decode("utf-8"))
+    return json_value.get("solar_plant").get("avg_monthly_ghi")
 
-@app.route("/npv-graph", methods=["GET"])
-def npv_graph():  
-    json_cum_npv=p.cum_npv_to_json()
-    return json_cum_npv
+@app.route("/npv-graph/<uuid>", methods=["GET"])
+def npv_graph(uuid):  
+    value = r.get(uuid)
+    json_value = json.loads(value.decode("utf-8"))
+    return p.cum_npv_to_json()
 
 @app.route("/irr", methods=["GET"])
-def irr():  
-    irr=p.get_irr()
+def irr(uuid):
+    value = r.get(uuid)
+    json_value = json.loads(value.decode("utf-8"))
     return irr
 
-@app.route("/cash-flows", methods=["GET"])
-def cash_flows():  
+@app.route("/cash-flows/<uuid>", methods=["GET"])
+def cash_flows(uuid):
+    value = r.get(uuid)
+    json_value = json.loads(value.decode("utf-8"))
     cash_flows=p.get_cash_flows()
     return cash_flows
 
-@app.route("/depreciation-schedule", methods=["GET"])
-def depreciation_schedule():  
+@app.route("/depreciation-schedule/<uuid>", methods=["GET"])
+def depreciation_schedule(uuid): 
+    value = r.get(uuid)
+    json_value = json.loads(value.decode("utf-8"))
     cash_flows=p.get_depreciation_schedule()
     return cash_flows
 
-@app.route("/outputs", methods=["GET"])
-def outputs():  
+@app.route("/outputs/<uuid>", methods=["GET"])
+def outputs(uuid):  
+    value = r.get(uuid)
+    json_value = json.loads(value.decode("utf-8"))
     avoided_co2_equivalent=p.get_outputs()
     return avoided_co2_equivalent
 
 
-@app.route("/sensitivity-analysis", methods=["GET"])
-def sensitivity_analysis():  
+@app.route("/sensitivity-analysis/<uuid>", methods=["GET"])
+def sensitivity_analysis(uuid): 
+    value = r.get(uuid)
+    json_value = json.loads(value.decode("utf-8"))
     sensitivity_analysis=project.get_sensitivity_analysis(p)
     return sensitivity_analysis
 
-@app.route("/breakeven-h2-price", methods=["GET"])
-def breakeven_price_h2():  
+@app.route("/breakeven-h2-price/<uuid>", methods=["GET"])
+def breakeven_price_h2(uuid):  
+    value = r.get(uuid)
+    json_value = json.loads(value.decode("utf-8"))
     breakeven_price=p.calculate_h2_break_even_price()
     return breakeven_price
 
-@app.route("/breakeven-carbon-credit-price", methods=["GET"])
-def breakeven_price_carbon_credit():  
+@app.route("/breakeven-carbon-credit-price/<uuid>", methods=["GET"])
+def breakeven_price_carbon_credit(uuid):  
+    value = r.get(uuid)
+    json_value = json.loads(value.decode("utf-8"))
     breakeven_price=p.calculate_carbon_credit_break_even_price()
     return breakeven_price
 
@@ -129,3 +153,4 @@ def format_number(value):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0",debug=True)
+

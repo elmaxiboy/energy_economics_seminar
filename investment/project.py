@@ -319,7 +319,59 @@ class project:
 
         self.breakeven_price_carbon_credit=test_project.carbon_credit_price
         
-        return json.dumps(self.breakeven_price_carbon_credit)    
+        return json.dumps(self.breakeven_price_carbon_credit)
+
+    def to_dict(self):
+        def serialize_flow(flow):
+            if flow is None:
+                return None
+            elif hasattr(flow, "tolist"):
+                return flow.tolist()  # for NumPy arrays or Pandas Series
+            elif isinstance(flow, (list, dict)):
+                return flow
+            else:
+                return str(flow)  # fallback for anything weird
+    
+        return {
+            "interest_rate": self.interest_rate,
+            "project_lifetime": self.project_lifetime,
+            "capex": self.capex,
+            "opex": self.opex,
+            "opex_increase_rate": self.opex_increase_rate,
+            "inflation_rate": self.inflation_rate,
+            "tax_rate": self.tax_rate,
+            "tangible_capex": self.tangible_capex,
+            "intangible_capex": self.intangible_capex,
+            "tangible_capex_depr_periods": self.tangible_capex_depr_periods,
+            "related_capex_depr_periods": self.related_capex_depr_periods,
+            "related_capex_factor": self.related_capex_factor,
+            "carbon_credit_price": self.carbon_credit_price,
+            "npv": self.npv,
+            "irr": self.irr,
+            "breakeven_price_h2": self.breakeven_price_h2,
+            "breakeven_price_carbon_credit": self.breakeven_price_carbon_credit,
+            "solar_plant": self.solar_plant.to_dict() if hasattr(self.solar_plant, "to_dict") else str(self.solar_plant),
+            "hydrogen_plant": self.hydrogen_plant.to_dict() if hasattr(self.hydrogen_plant, "to_dict") else str(self.hydrogen_plant),
+            "total_cash_flow":self.total_cash_flow,
+            "total_discounted_cash_flow":self.total_discounted_cash_flow,
+            "cum_npv_cash_flows":self.total_cum_npv,
+            
+            # Serialize all *_flows
+            "opex_flows": serialize_flow(self.opex_flows),
+            "cum_npv_flows": serialize_flow(self.cum_npv_flows),
+            "cash_flows": serialize_flow(self.cash_flows),
+            "discounted_cash_flows": serialize_flow(self.discounted_cash_flows),
+            "annual_revenue_flows": serialize_flow(self.annual_revenue_flows),
+            "income_tax_flows": serialize_flow(self.income_tax_flows),
+            "tangible_capex_depreciation_flows": serialize_flow(self.tangible_capex_depreciation_flows),
+            "related_capex_depreciation_flows": serialize_flow(self.related_capex_depreciation_flows),
+            "tons_co2_equivalent_flows": serialize_flow(self.tons_co2_equivalent_flows),
+            "h2_output_flows": serialize_flow(self.h2_output_flows),
+            "emmissions_improvement_rate": self.emmissions_improvement_rate,
+            "annual_energy_output_flows": serialize_flow(self.annual_energy_output_flows),
+        
+    }
+ 
 
 def get_sensitivity_analysis(reference_project : project):
 

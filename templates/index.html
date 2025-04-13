@@ -115,10 +115,13 @@
     </div>
 
 
+    <script>
+        const uuid = "{{ uuid }}";
+    </script>
 
 
 
-    {% if npv is not none %}
+{% if uuid is not none %}
     <h2>Results</h2>
     
     <div class="results">
@@ -152,7 +155,7 @@
             <h2>Average Daily Global Horizontal Irradiance</h2>
             <div class="tooltip"></div>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
-            <script>draw_ghi()</script>
+            <script>draw_ghi("{{ uuid }}")</script>
 
         </div>
 
@@ -160,7 +163,7 @@
             <h2>Net present Value</h2>
             <div class="tooltip"></div>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
-            <script>draw_npv()</script>
+            <script>draw_npv("{{ uuid }}")</script>
         </div>
     </div>
 
@@ -168,7 +171,7 @@
         <div id="tornado_chart">
             <h2>Sensitivity Analysis (+-10%)</h2>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
-            <script>draw_sensitivity_tornado_chart()</script>
+            <script>draw_sensitivity_tornado_chart("{{ uuid }}")</script>
         </div>
     </div>
 
@@ -177,21 +180,21 @@
             <h2>Cash Flows</h2>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
             <table id="data-table-cash-flows"></table>
-            <script>draw_cash_flows()</script>
+            <script>draw_cash_flows("{{ uuid }}")</script>
         </div>
 
         <div id="depreciation_schedule">
             <h2>Depreciation Schedule</h2>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
             <table id="data-table-depreciation-schedule"></table>
-            <script>draw_depreciation_schedule()</script>
+            <script>draw_depreciation_schedule("{{ uuid }}")</script>
         </div>
 
         <div id="outputs">
             <h2>Energy Outputs</h2>
             <script src="{{ url_for('static', filename='charts.js') }}"></script>
             <table id="data-table-outputs"></table>
-            <script>draw_outputs()</script>
+            <script>draw_outputs("{{ uuid }}")</script>
         </div>
 
     </div>
@@ -199,6 +202,6 @@
 
 
 
-    {% endif %}
+{% endif %}
 </body>
 </html>
