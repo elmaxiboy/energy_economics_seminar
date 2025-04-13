@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import Flask, render_template, request, send_file, url_for
+from flask import Flask, render_template, request, send_file, url_for, session
 import utils
 from plant import solar as s
 from plant import hydrogen as h2
@@ -13,7 +13,6 @@ app.secret_key = "seminar"  # Required for Flask-WTF forms
 # NPV Calculation Function
 @app.route("/", methods=["GET", "POST"])
 def index():
-    
     if request.method == "POST":
 
         #Get params from request side
@@ -52,21 +51,6 @@ def index():
                           related_capex_factor,opex_increase_rate,
                           carbon_credit_price)
 
-        p.solar_plant.calculate_avg_monthly_ghi()
-        energy_output=p.solar_plant.calculate_annual_production()
-        cap_factor=p.solar_plant.calculate_capacity_factor()
-        
-        p.calculate_npv()
-        p.calculate_irr()
-        p.calculate_h2_break_even_price()
-        p.calculate_carbon_credit_break_even_price()
-        
-        # Pass the zipped data to the template
-        cash_flow_table = list(zip(range(0, project_lifetime + 1), p.cash_flows, p.discounted_cash_flows,p.cum_npv_flows))
-
-        total_cash_flow = sum(p.cash_flows) or 0
-        total_discounted_cash_flow = sum(p.discounted_cash_flows) or 0
-        total_cum_npv = p.cum_npv_flows[-1] or 0
         
         return render_template(
             "index.html",
@@ -74,11 +58,10 @@ def index():
             total_h2_production=round(sum(p.h2_output_flows,2)),
             energy_output=round(sum(p.annual_energy_output_flows,2)),
             annual_revenue=p.annual_revenue_flows,
-            cash_flow_table=cash_flow_table,
-            total_cash_flow=round(total_cash_flow, 2),
-            total_discounted_cash_flow=round(total_discounted_cash_flow, 2),
-            total_cum_npv=round(total_cum_npv, 2),
-            cap_factor=round(cap_factor,2),
+            total_cash_flow=round(p.total_cash_flow, 2),
+            total_discounted_cash_flow=round(p.total_discounted_cash_flow, 2),
+            total_cum_npv=round(p.total_cum_npv, 2),
+            cap_factor=round(p.solar_plant.cap_factor,2),
             irr= p.irr,
             avoided_co2_equivalents_tons= round(sum(p.tons_co2_equivalent_flows),2),
             breakeven_price_h2=round(p.breakeven_price_h2,2),

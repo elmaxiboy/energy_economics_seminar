@@ -52,6 +52,19 @@ class project:
         self.annual_energy_output_flows=None
         self.carbon_credit_price=carbon_credit_price
 
+        self.solar_plant.calculate_avg_monthly_ghi()
+        self.solar_plant.calculate_annual_production()
+        self.solar_plant.calculate_capacity_factor()
+        
+        self.calculate_npv()
+        self.calculate_irr()
+        self.calculate_h2_break_even_price()
+        self.calculate_carbon_credit_break_even_price()
+
+        self.total_cash_flow = sum(self.cash_flows)
+        self.total_discounted_cash_flow = sum(self.discounted_cash_flows)
+        self.total_cum_npv = self.cum_npv_flows[-1]
+
 
     def calculate_npv(self):
     
