@@ -1,12 +1,38 @@
+version: '3.8'
+
 services:
+
+
   npv_calculator:
-      image: npv_calculator:latest
-      container_name: npv_calculator
-      ports:
-        - 5000:5000 #"[host:]container[/protocol]"
-      restart: unless-stopped
-      networks:
+    image: npv_calculator:latest
+    container_name: npv_calculator
+    expose:
+      - "5000"
+    restart: unless-stopped
+    networks:
       - energy
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - energy
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - npv_calculator
+    networks:
+      - energy
+
 networks:
   energy:
-      name: "energy"
+    name: "energy"
