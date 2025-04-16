@@ -96,7 +96,7 @@ class solar:
                 "cap_factor" :self.cap_factor,
                 "latitude":self.latitude ,
                 "longitude" :self.longitude,
-                "annual_production_":self.annual_production_mwh,
+                "annual_production_mwh":self.annual_production_mwh,
                 "avg_monthly_ghi":self.avg_monthly_ghi,
                 "panel_efficiency":self.panel_efficiency,
                 "production_decline":self.production_decline,
@@ -112,3 +112,33 @@ class solar:
         String representation of the solar plant.
         """
         return f"Installed capacity: {self.installed_cap} W, Capacity factor: {self.cap_factor:.2f} %"
+
+
+def calculate_annual_production_dict(solar_dict):
+        """
+        Calculates the annual energy production in MWh.
+        """
+        
+        #Initialize annual production
+        annual_production_kwh=0 
+        
+        #Standard test conditions: Surface per 1kW ~ 1kw/m2
+        stc_capacity_per_m2=1 
+
+        #Required m2 for actual capacity
+        m2_per_mw = (solar_dict.get("installed_cap")*1000)/(stc_capacity_per_m2)
+        
+        data_dict = json.loads(solar_dict.get("avg_monthly_ghi"))
+        for month,ghi in data_dict.items():
+            annual_production_kwh=annual_production_kwh+(ghi*30) #KWh/m2/year
+ 
+        solar_dict["annual_production_mwh"] = (annual_production_kwh/1000)*(solar_dict.get("panel_efficiency")/100)*solar_dict.get("installed_cap")*5000
+        solar_dict["land_required"]=m2_per_mw
+        
+        return solar_dict    
+
+def calculate_capacity_factor_dict(solar_dict):
+        theoretical_annual_production= solar_dict.get("installed_cap")*365*24
+        solar_dict["cap_factor"]=solar_dict.get("annual_production_mwh")/theoretical_annual_production
+        return solar_dict
+    

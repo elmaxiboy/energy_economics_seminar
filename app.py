@@ -11,7 +11,7 @@ import redis
 
 app = Flask(__name__)
 app.secret_key = "seminar"  # Required for Flask-WTF forms
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.Redis(host='redis', port=6379, db=0)
 
 # NPV Calculation Function
 @app.route("/", methods=["GET", "POST"])
@@ -44,8 +44,6 @@ def index():
 
         solar_plant = s.solar(installed_cap,latitude,longitude,panel_efficiency, production_decline)
         h2_plant=h2.hydrogen(electrolyzers_efficiency,h2_price,co2_equivalence)
-
-        global p # investment project
  
         p=project.project(project_lifetime,discount_rate,capex,opex,
                           inflation_rate,solar_plant,h2_plant,tax_rate,
@@ -93,33 +91,34 @@ def avg_monthly_ghi_graph(uuid):
 def npv_graph(uuid):  
     value = r.get(uuid)
     json_value = json.loads(value.decode("utf-8"))
-    return p.cum_npv_to_json()
+    dict_with_indexes=project.cum_npv_to_json(json_value)
+    return dict_with_indexes
 
 @app.route("/irr", methods=["GET"])
 def irr(uuid):
     value = r.get(uuid)
     json_value = json.loads(value.decode("utf-8"))
-    return irr
+    return json_value.get("irr")
 
 @app.route("/cash-flows/<uuid>", methods=["GET"])
 def cash_flows(uuid):
     value = r.get(uuid)
     json_value = json.loads(value.decode("utf-8"))
-    cash_flows=p.get_cash_flows()
+    cash_flows=project.get_cash_flows(json_value)
     return cash_flows
 
 @app.route("/depreciation-schedule/<uuid>", methods=["GET"])
 def depreciation_schedule(uuid): 
     value = r.get(uuid)
     json_value = json.loads(value.decode("utf-8"))
-    cash_flows=p.get_depreciation_schedule()
+    cash_flows=project.get_depreciation_schedule(json_value)
     return cash_flows
 
 @app.route("/outputs/<uuid>", methods=["GET"])
 def outputs(uuid):  
     value = r.get(uuid)
     json_value = json.loads(value.decode("utf-8"))
-    avoided_co2_equivalent=p.get_outputs()
+    avoided_co2_equivalent=project.get_outputs(json_value)
     return avoided_co2_equivalent
 
 
@@ -127,21 +126,21 @@ def outputs(uuid):
 def sensitivity_analysis(uuid): 
     value = r.get(uuid)
     json_value = json.loads(value.decode("utf-8"))
-    sensitivity_analysis=project.get_sensitivity_analysis(p)
+    sensitivity_analysis=project.get_sensitivity_analysis(json_value)
     return sensitivity_analysis
 
 @app.route("/breakeven-h2-price/<uuid>", methods=["GET"])
 def breakeven_price_h2(uuid):  
     value = r.get(uuid)
     json_value = json.loads(value.decode("utf-8"))
-    breakeven_price=p.calculate_h2_break_even_price()
+    breakeven_price=project.calculate_h2_break_even_price_dict(json_value)
     return breakeven_price
 
 @app.route("/breakeven-carbon-credit-price/<uuid>", methods=["GET"])
 def breakeven_price_carbon_credit(uuid):  
     value = r.get(uuid)
     json_value = json.loads(value.decode("utf-8"))
-    breakeven_price=p.calculate_carbon_credit_break_even_price()
+    breakeven_price=project.calculate_carbon_credit_break_even_price(json_value)
     return breakeven_price
 
 @app.template_filter("format_number")
