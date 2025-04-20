@@ -1,7 +1,5 @@
 
 import requests
-import pandas as pd
-import json
 
 class solar:
     def __init__(self, installed_cap: float, latitude: float,longitude: float, panel_efficiency: float, production_decline:float):
@@ -35,7 +33,7 @@ class solar:
         #Required m2 for actual capacity
         m2_per_mw = (self.installed_cap*1000)/(stc_capacity_per_m2)
         
-        data_dict = json.loads(self.avg_monthly_ghi)
+        data_dict = self.avg_monthly_ghi
         for month,ghi in data_dict.items():
             annual_production_kwh=annual_production_kwh+(ghi*30) #KWh/m2/year
  
@@ -55,20 +53,34 @@ class solar:
         data = response.json()
         data = data['properties']['parameter']
         
-        # Convert the dictionary to a DataFrame
-        df = pd.DataFrame(list(data['ALLSKY_SFC_SW_DWN'].items()), columns=['yearMonth', 'radiation'])
+        results = list(data['ALLSKY_SFC_SW_DWN'].items())
         
         # Format dataframe
-        
-        df['month'] = df['yearMonth'].str[-2:]
-        df['year'] = df['yearMonth'].str[:4]
-        df = df.drop(df[df['month'] == '13'].index)
-        df=df.drop('yearMonth',axis=1)
-        df= df.groupby('month')['radiation'].mean().round(2)
+        ghi={
+            "01":[],
+            "02":[],
+            "03":[],
+            "04":[],
+            "05":[],
+            "06":[],
+            "07":[],
+            "08":[],
+            "09":[],
+            "10":[],
+            "11":[],
+            "12":[]
+        }
+
+        for value in results:
+            month= str(value[0])[-2:]
+            if month!="13":
+                ghi[month].append(value[1])
+
+        averages_ghi = {key: round(sum(values) / len(values),2) if values else 0 for key, values in ghi.items()}
         
         # Group by the month and calculate the mean
         
-        self.avg_monthly_ghi = df.to_json()
+        self.avg_monthly_ghi = averages_ghi
         self.last_latitude = self.latitude
         self.last_longitude = self.longitude
         
@@ -128,7 +140,7 @@ def calculate_annual_production_dict(solar_dict):
         #Required m2 for actual capacity
         m2_per_mw = (solar_dict.get("installed_cap")*1000)/(stc_capacity_per_m2)
         
-        data_dict = json.loads(solar_dict.get("avg_monthly_ghi"))
+        data_dict = solar_dict.get("avg_monthly_ghi")
         for month,ghi in data_dict.items():
             annual_production_kwh=annual_production_kwh+(ghi*30) #KWh/m2/year
  

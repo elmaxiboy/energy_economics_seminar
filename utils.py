@@ -1,10 +1,3 @@
-import json
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import io
-from matplotlib.ticker import FuncFormatter
-
 default_values = {
         "project_lifetime": 20,
         "discount_rate": 6,

@@ -1,12 +1,7 @@
-
-import requests
-import pandas as pd
 import json
 from plant import solar as s
 from plant import hydrogen as h2
-import utils
 import numpy_financial as npf
-import math 
 import copy
 
 class project:
