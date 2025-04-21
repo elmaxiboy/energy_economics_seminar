@@ -113,3 +113,81 @@
             <button  type="submit">Calculate</button>        
         </form>
     </div>
+
+
+
+    <h2>Results</h2>
+    
+    <div class="results">
+        <div id="summary">
+            
+            <p><strong>Energy Output:</strong> <br> {{ energy_output | format_number }} MWh</p>
+            <p><strong>Capacity Factor:</strong> <br>{{ cap_factor | format_number }} </p>
+            <p><strong>H2 Production:</strong> <br> {{ total_h2_production | format_number }} tonnes</p>
+            
+        </div> 
+
+        <div id="summary">
+            <p><strong>NPV:</strong> <br>{{ npv | format_number }} USD</p>
+            <p><strong>IRR:</strong> <br>{{ irr }} %</p>
+        </div>
+
+
+        <div id="summary">
+            
+            <p><strong>H2 breakeven:</strong> <br>{{ breakeven_price_h2}} USD/kg</p>
+            <p><strong>Carbon credit breakeven:</strong> <br>{{ breakeven_price_carbon_credit}} USD/tCO2eq</p>
+            <p><strong>Emmisions avoided:</strong> <br>{{avoided_co2_equivalents_tons| format_number}} tCO2eq</p>
+        </div>    
+            
+        
+    </div>
+
+
+
+    <div class="results">
+        <script src="{{ url_for('static', filename='charts.js') }}"></script>
+        <script>get_results()</script>
+    </div>
+
+    <div class="results">  
+        <div id="ghi">
+            <h2>Average Daily Global Horizontal Irradiance</h2>
+            <div class="tooltip"></div>
+        </div>
+
+        <div id="npv">
+            <h2>Net present Value</h2>
+            <div class="tooltip"></div>
+        </div>
+    </div>
+
+    <div class="results">
+        <div id="tornado_chart">
+            <h2>Sensitivity Analysis (+-10%)</h2>
+        </div>
+    </div>
+
+    <div class="results">
+        <div id="cashflows">
+            <h2>Cash Flows</h2>
+            <table id="data-table-cash-flows"></table>
+        </div>
+
+        <div id="depreciation_schedule">
+            <h2>Depreciation Schedule</h2>
+            <table id="data-table-depreciation-schedule"></table>
+        </div>
+
+        <div id="outputs">
+            <h2>Energy Outputs</h2>
+            <table id="data-table-outputs"></table>
+        </div>
+
+    </div>
+
+
+
+
+</body>
+</html>

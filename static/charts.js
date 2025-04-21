@@ -1,9 +1,26 @@
 const svg_W = 600
 const svg_H = 300
+
+function get_results() {
+    fetch("/plot-data")
+      .then(response => response.json())
+      .then(data => {
+
+        draw_ghi(data["avg_monthly_ghi"])
+        draw_cash_flows(data["cash_flows"])
+        draw_depreciation_schedule(data["depreciation_schedule"])
+        draw_npv(data["npv"])
+        draw_outputs(data["avoided_co2_equivalent"])
+        draw_sensitivity_tornado_chart(data["sensitivity_analysis"])
+      })
+      .catch(err => {
+        document.getElementById("plots").textContent = "Error fetching results.";
+        console.error(err);
+      });
+  }
  
- function draw_ghi(uuid){
+ function draw_ghi(data){
     // Load the JSON data
-    d3.json(`/avg-monthly-ghi-graph/${uuid}`).then(data => {
         const formattedData = Object.entries(data).map(([month, radiation]) => ({
             month: +month, // Convert month to integer
             radiation: +radiation // Convert radiation to number
@@ -97,13 +114,10 @@ const svg_H = 300
             tooltip.style("opacity", 0);
         });
  
-    });
-}
+    }
 
-function draw_npv(uuid) {
-    // Fetch data from the endpoint
-    d3.json(`/npv-graph/${uuid}`)
-        .then(data => {
+function draw_npv(data) {
+
             // Validate and transform data into a consistent format
             const formatter = new Intl.NumberFormat('en-US');
             const dataset = Object.entries(data)
@@ -216,24 +230,10 @@ function draw_npv(uuid) {
                     .attr("transform", "rotate(-90)")
                     .attr("text-anchor", "middle")
                     .text("MM USD");
-        })
-        .catch(error => {
-            console.error("Error fetching or processing data:", error);
-        });
-}
+        }
 
-function draw_cash_flows(uuid){
+function draw_cash_flows(data){
 
-    // Fetch JSON data
-    d3.json(`/cash-flows/${uuid}`)
-        .then(data => {
-            createTable(data);
-        })
-        .catch(error => {
-            console.error("Error fetching data:", error);
-        });
-
-    function createTable(data) {
         const table = d3.select("#data-table-cash-flows");
 
         // Extract column names from the JSON
@@ -283,23 +283,13 @@ function draw_cash_flows(uuid){
             })
             .style("font-weight", "bold"); // Make the total row bold
     }
-}
 
 
 
 
-function draw_outputs(uuid){
+function draw_outputs(data){
 
-    // Fetch JSON data
-    d3.json(`/outputs/${uuid}`)
-        .then(data => {
-            createTable(data);
-        })
-        .catch(error => {
-            console.error("Error fetching data:", error);
-        });
 
-    function createTable(data) {
         const table = d3.select("#data-table-outputs");
 
         // Extract column names from the JSON
@@ -340,20 +330,11 @@ function draw_outputs(uuid){
             })
             .style("font-weight", "bold"); // Make the total row bold
     }
-}
 
-function draw_depreciation_schedule(uuid){
 
-    // Fetch JSON data
-    d3.json(`/depreciation-schedule/${uuid}`)
-        .then(data => {
-            createTable(data);
-        })
-        .catch(error => {
-            console.error("Error fetching data:", error);
-        });
+function draw_depreciation_schedule(data){
 
-    function createTable(data) {
+
         const table = d3.select("#data-table-depreciation-schedule");
 
         // Extract column names from the JSON
@@ -394,13 +375,11 @@ function draw_depreciation_schedule(uuid){
             })
             .style("font-weight", "bold"); // Make the total row bold
     }
-}
 
 
-function draw_sensitivity_tornado_chart(uuid) {
-    // Fetch data from the endpoint
-    d3.json(`/sensitivity-analysis/${uuid}`)
-      .then(data => {
+
+function draw_sensitivity_tornado_chart(data) {
+
         const keys = Object.keys(data);
         const formattedData = keys.map(key => ({
           key,
@@ -516,11 +495,7 @@ function draw_sensitivity_tornado_chart(uuid) {
           .attr("text-anchor", "middle")
           .text("Parameters");
   
-      })
-      .catch(error => {
-        console.error("Error fetching or processing data:", error);
-      });
-  }
+      }
 
   
   function updateSliderValues() {

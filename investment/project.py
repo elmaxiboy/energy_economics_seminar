@@ -1,7 +1,6 @@
 import json
 from plant import solar as s
 from plant import hydrogen as h2
-import numpy_financial as npf
 import copy
 
 class project:
@@ -33,6 +32,7 @@ class project:
         self.tangible_capex_depreciation_flows=None
         self.related_capex_depreciation_flows= None
         self.irr = None
+        self.irr2=None
         self.breakeven_price_h2=None
         self.breakeven_price_carbon_credit=None
         self.tax_rate = tax_rate
@@ -157,13 +157,34 @@ class project:
                 depreciation_flows.append(0)    
 
         return depreciation_flows
+    
+    def calculate_irr(self, precision=1e-6, max_iterations=1000):
+        low = -1.0  # Start from -100% return
+        high = 1.0  # Up to 100% return
+        iteration = 0
 
+        def npv(rate):
+            return sum(cf / (1 + rate) ** i for i, cf in enumerate(self.cash_flows))
+
+        while iteration < max_iterations:
+            mid = (low + high) / 2
+            npv_mid = npv(mid)
+
+            if abs(npv_mid) < precision:
+                self.irr=round(mid,4)
+                return self.irr
+            elif npv_mid > 0:
+                low = mid
+            else:
+                high = mid
+
+            iteration += 1
+
+        self.irr=round(((low + high) / 2),4)  # Return the best estimate
+        return self.irr
 
     
-    def calculate_irr(self):
-        self.irr= round(npf.irr(self.cash_flows)*100,4)
-        return json.dumps(self.irr)
-    
+
     def get_irr(self):
         return json.dumps(self.irr)
     
@@ -399,11 +420,11 @@ def get_sensitivity_analysis(reference_project : dict):
         dict_shifted_npv[key]=values         
 
 
-    return json.dumps(dict_shifted_npv)
+    return dict_shifted_npv
 
 def cum_npv_to_json(json_dict):
     dict_with_indexes = {index: value for index, value in enumerate(json_dict.get("cum_npv_flows"))}
-    return json.dumps(dict_with_indexes)
+    return dict_with_indexes
 
 def get_cash_flows(json_dict):
     
@@ -421,8 +442,8 @@ def get_cash_flows(json_dict):
                                                                json_dict.get("discounted_cash_flows"),
                                                                json_dict.get("cum_npv_flows"))]
 
-        json_output = json.dumps(json_data, indent=4)
-        return json_output
+       
+        return json_data
 
 def get_outputs(json_dict):
     
@@ -438,8 +459,8 @@ def get_outputs(json_dict):
                                                                json_dict.get("tons_co2_equivalent_flows")
                                                                )]
 
-        json_output = json.dumps(json_data, indent=4)
-        return json_output
+        
+        return json_data
 
 def get_depreciation_schedule(json_dict):
     
@@ -454,8 +475,8 @@ def get_depreciation_schedule(json_dict):
                                                                json_dict.get("related_capex_depreciation_flows")
                                                                )]
 
-        json_output = json.dumps(json_data, indent=4)
-        return json_output
+        
+        return json_data
 
 def calculate_npv_dict(project_dict):
 
@@ -570,7 +591,7 @@ def calculate_h2_break_even_price_dict(project_dict):
 
         breakeven_price_h2=test_project["hydrogen_plant"]["h2_price"]
         
-        return json.dumps(breakeven_price_h2)
+        return breakeven_price_h2
 
 def calculate_carbon_credit_break_even_price_dict(project_dict):
     """
@@ -607,4 +628,5 @@ def calculate_carbon_credit_break_even_price_dict(project_dict):
             low_price = mid_price
     breakeven_price_carbon_credit=test_project["carbon_credit_price"]
     
-    return json.dumps(breakeven_price_carbon_credit)
+    return breakeven_price_carbon_credit
+
