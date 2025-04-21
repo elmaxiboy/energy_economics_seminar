@@ -1,22 +1,12 @@
 version: '3.8'
 
 services:
-
-
   npv_calculator:
     image: npv_calculator:latest
+    #pull_policy: always
     container_name: npv_calculator
     expose:
       - "5000"
-    restart: unless-stopped
-    networks:
-      - energy
-
-  redis:
-    image: redis:latest
-    container_name: redis
-    ports:
-      - "6379:6379"
     restart: unless-stopped
     networks:
       - energy
