@@ -6,3 +6,4 @@ __pycache__
 Dockerfile
 *.md
 docker-compose.yml
+flask_session
