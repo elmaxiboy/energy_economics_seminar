@@ -32,16 +32,13 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
-
+    runs-on: max-escobar-viegas
     steps:
-
       - name: Deploy to RasPi via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.RASPBERRY_PI_HOST }}
           username: ${{ secrets.RASPBERRY_PI_USER }}
-          port: ${{ secrets.RASPBERRY_PI_PORT }}
           key: ${{ secrets.RASPBERRY_PI_KEY }}
           script: |
             cd ~/energy
