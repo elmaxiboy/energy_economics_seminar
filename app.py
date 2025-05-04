@@ -75,7 +75,7 @@ def calculate_results():
         total_discounted_cash_flow=round(p.total_discounted_cash_flow, 2),
         total_cum_npv=round(p.total_cum_npv, 2),
         cap_factor=round(p.solar_plant.cap_factor,2),
-        irr= p.irr*100,
+        irr= round(p.irr*100,2),
         avoided_co2_equivalents_tons= round(sum(p.tons_co2_equivalent_flows),2),
         breakeven_price_h2=round(p.breakeven_price_h2,2),
         breakeven_price_carbon_credit=round(p.breakeven_price_carbon_credit,2),
