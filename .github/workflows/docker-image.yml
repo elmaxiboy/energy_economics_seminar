@@ -44,4 +44,4 @@ jobs:
           key: ${{ secrets.RASPBERRY_PI_KEY }}
           script: |
             cd ~/energy
-            docker-compose up -d
+            docker compose up -d
