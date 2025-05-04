@@ -47,7 +47,21 @@ Feel free to collaborate. If you have any questions you can contact me via email
 
 ## TODO...
 
-- handle multiple sessions
 - cache for same location 
 - save results to database
-- 
+
+
+#### Build for different architectures:
+
+To build docker image for raspberry Pi (I am using version 3 B):
+
+```sh
+docker buildx build --platform linux/arm/v7 -t <docker repo>/npv_calculator:<tag> --push .
+```
+
+### Useful commands:
+
+#### test endpoints within the container
+```sh
+docker exec -it nginx curl -v http://npv_calculator:5000/plot-data
+```
