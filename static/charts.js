@@ -2,7 +2,14 @@ const svg_W = 600
 const svg_H = 300
 
 function get_results() {
-    fetch("/plot-data")
+
+    const sessionCookie = document.cookie;
+
+    fetch("/plot-data", {
+        method: 'GET',
+        headers: {'Cookie': sessionCookie},
+        credentials: 'same-origin' 
+      })
       .then(response => response.json())
       .then(data => {
 
