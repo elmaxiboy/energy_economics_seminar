@@ -9,7 +9,12 @@ from plant import hydrogen as h2
 from investment import project
 
 app = Flask(__name__)
-app.secret_key = "seminar" 
+app.secret_key = "seminar"
+app.url_map.strict_slashes = False # resolve to the canonical version of the endpoint ("endpoint/" -> "endpoint")
+
+app.config['SESSION_COOKIE_SECURE'] = False  # only True if HTTPS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 @app.route("/", methods=["GET"])
 def index():
@@ -82,7 +87,7 @@ def calculate_results():
     )
 
 
-@app.route("/plot-data/", methods=["GET"])
+@app.route("/plot-data", methods=["GET"])
 def get_plot_data():
 
     p= session.get("project")
