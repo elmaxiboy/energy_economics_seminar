@@ -1,4 +1,4 @@
-name: Build ARMv7 for Raspi
+name: Build to RasPi
 
 on:
   push:
@@ -41,6 +41,7 @@ jobs:
         with:
           host: ${{ secrets.RASPBERRY_PI_HOST }}
           username: ${{ secrets.RASPBERRY_PI_USER }}
+          port: ${{ secrets.RASPBERRY_PI_PORT }}
           key: ${{ secrets.RASPBERRY_PI_KEY }}
           script: |
             cd ~/energy
